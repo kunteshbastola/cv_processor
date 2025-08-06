@@ -1,14 +1,14 @@
 from django.db import models
-
-# Create your models here.
-from django.db import models
 from django.utils import timezone
+from django.contrib.auth.models import User  # 👈 Add this
 import os
 
 def cv_upload_path(instance, filename):
     return f'cvs/{timezone.now().strftime("%Y/%m/%d")}/{filename}'
 
 class CVUpload(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE,null=True,blank=True)  # 👈 Add this line
+
     file = models.FileField(upload_to=cv_upload_path)
     filename = models.CharField(max_length=255)
     uploaded_at = models.DateTimeField(auto_now_add=True)
@@ -26,6 +26,7 @@ class CVUpload(models.Model):
     format_score = models.FloatField(null=True, blank=True)
     
     # Extracted sections
+    job_name = models.CharField(max_length=255, blank=True)
     contact_info = models.TextField(blank=True)
     experience = models.TextField(blank=True)
     education = models.TextField(blank=True)

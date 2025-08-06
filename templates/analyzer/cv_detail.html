@@ -11,33 +11,40 @@
 </head>
 <body>
 <div class="container mt-5">
-  <h1>CV Details: {{ cv.filename }}</h1>
+  <h1>CV Details</h1>
 
-  <!-- Verify the URL name matches your urls.py -->
-  <a href="{% url 'results' %}" class="btn btn-secondary mb-3">Back to Results</a>
+  <h3>Filename:</h3>
+  <p>{{ cv.filename }}</p>
 
-  <dl class="row">
-    <dt class="col-sm-3">Uploaded At:</dt>
-    <dd class="col-sm-9">{{ cv.uploaded_at|date:"Y-m-d H:i" }}</dd>
+  <h3>Job Role:</h3>
+  <p>{{ cv.job_name }}</p>
 
-    <!-- Example: Ensure these fields exist in your model -->
-    <dt class="col-sm-3">Overall Score:</dt>
-    <dd class="col-sm-9">{{ cv.overall_score|default:"Not scored" }}</dd>
+  <h3>Uploaded At:</h3>
+  <p>{{ cv.uploaded_at|date:"Y-m-d H:i" }}</p>
 
-    {% if cv.contact_info %}
-    <dt class="col-sm-3">Contact Info:</dt>
-    <dd class="col-sm-9">{{ cv.contact_info|linebreaks }}</dd>
-    {% endif %}
+  <h3>Overall Score:</h3>
+  <p>{{ cv.overall_score|floatformat:2 }}</p>
 
-    <!-- Repeat for other fields (education, skills, etc.) -->
-  </dl>
+  <h3>Contact Info:</h3>
+  <pre>{{ cv.contact_info }}</pre>
 
-  <!-- Safe file download -->
-  {% if cv.file %}
-    <a href="{{ cv.file.url }}" class="btn btn-primary" target="_blank" download>
-      Download CV File
-    </a>
+  <h3>Experience:</h3>
+  <pre>{{ cv.experience }}</pre>
+
+  <h3>Education:</h3>
+  <pre>{{ cv.education }}</pre>
+
+  <h3>Skills:</h3>
+  <pre>{{ cv.skills }}</pre>
+
+  <h3>Suggestions:</h3>
+  {% if cv.suggestions %}
+    <p>{{ cv.suggestions|linebreaks }}</p>
+  {% else %}
+    <p>No suggestions available.</p>
   {% endif %}
+
+  <a href="{% url 'results' %}" class="btn btn-secondary mt-3">Back to Results</a>
 </div>
 </body>
 </html>

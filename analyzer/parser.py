@@ -245,3 +245,4 @@ class CVParser:
                 'education': 'Error during parsing',
                 'skills': 'Error during parsing'
             }
+    

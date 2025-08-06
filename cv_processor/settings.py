@@ -75,8 +75,11 @@ WSGI_APPLICATION = 'cv_processor.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'cv_processor_db',
+        'USER': 'postgres',
+        'PASSWORD': 'kuntesh7',
+        'HOST': 'localhost',  
     }
 }
 
@@ -133,3 +136,5 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # File upload settings
 FILE_UPLOAD_MAX_MEMORY_SIZE = 10 * 1024 * 1024  # 10MB
 DATA_UPLOAD_MAX_MEMORY_SIZE = 10 * 1024 * 1024   # 10MB
+
+LOGIN_REDIRECT_URL = '/upload_cv/'  # or use reverse('upload_cv') in views

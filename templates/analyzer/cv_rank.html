@@ -1,0 +1,13 @@
+<h2>Top 5 CVs from All Users</h2>
+
+{% for cv in cvs %}
+  <div style="border: 1px solid #999; padding: 10px; margin-bottom: 10px;">
+    <strong>{{ cv.filename }}</strong><br>
+    Score: {{ cv.overall_score }}<br>
+    <a href="{% url 'cv_detail' cv.id %}">View Details</a>
+  </div>
+{% empty %}
+  <p>No CVs found.</p>
+{% endfor %}
+
+<a href="{% url 'upload_cv' %}">← Back to Upload Page</a>

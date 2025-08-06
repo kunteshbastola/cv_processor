@@ -1,0 +1,22 @@
+# Virtual environment
+env/
+venv/
+
+# Python files
+*.pyc
+__pycache__/
+
+# VSCode
+.vscode/
+
+# Database
+*.sqlite3
+
+# OS files
+.DS_Store
+
+# Logs
+*.log
+
+# Migrations (optional if you prefer clean)
+*/migrations/__pycache__/

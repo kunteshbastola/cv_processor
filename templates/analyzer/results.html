@@ -1,63 +1,47 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Uploaded CVs</title>
-  <link
-    href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
-    rel="stylesheet"
-  />
-</head>
-<body>
-<div class="container mt-5">
-  <h1>Uploaded CVs</h1>
+<h2>Uploaded CV Results</h2>
 
-  {% if messages %}
-    <div>
-      {% for message in messages %}
-        <div class="alert alert-{{ message.tags }} mt-2" role="alert">
-          {{ message }}
-        </div>
-      {% endfor %}
+{% if page_obj %}
+  {% for cv in page_obj %}
+    <div style="border: 1px solid #ccc; padding: 15px; margin-bottom: 20px;">
+      <h3>{{ cv.filename }} | Job: {{ cv.job_name }}</h3>
+      <p><strong>Uploaded:</strong> {{ cv.uploaded_at }}</p>
+      <p><strong>Overall Score:</strong> {{ cv.overall_score }}</p>
+
+      <h4>Contact Info</h4>
+      <pre>{{ cv.contact_info }}</pre>
+
+      <h4>Experience</h4>
+      <pre>{{ cv.experience }}</pre>
+
+      <h4>Education</h4>
+      <pre>{{ cv.education }}</pre>
+
+      <h4>Skills</h4>
+      <pre>{{ cv.skills }}</pre>
+
+      <h4>Suggestions</h4>
+      <pre>{{ cv.suggestions }}</pre>
+
+      <form action="{% url 'delete_cv' cv.id %}" method="post" style="margin-top: 10px;">
+        {% csrf_token %}
+        <button type="submit" onclick="return confirm('Are you sure?')">Delete</button>
+      </form>
     </div>
-  {% endif %}
+  {% empty %}
+    <p>No CVs found.</p>
+  {% endfor %}
 
-  {% if cvs %}
-    <table class="table table-striped mt-3">
-      <thead>
-        <tr>
-          <th>Filename</th>
-          <th>Uploaded At</th>
-          <th>Overall Score</th>
-          <th>Actions</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for cv in cvs %}
-          <tr>
-            <td>{{ cv.filename }}</td>
-            <td>{{ cv.uploaded_at|date:"Y-m-d H:i" }}</td>
-            <td>{{ cv.overall_score }}</td>
-            <td>
-              <a href="{% url 'cv_detail' cv.id %}" class="btn btn-sm btn-info">View</a>
-              <form method="post" action="{% url 'delete_cv' cv.id %}" style="display:inline;">
-                {% csrf_token %}
-                <button type="submit" class="btn btn-sm btn-danger"
-                  onclick="return confirm('Are you sure you want to delete this CV?');">
-                  Delete
-                </button>
-              </form>
-            </td>
-          </tr>
-        {% endfor %}
-      </tbody>
-    </table>
-  {% else %}
-    <p>No CVs uploaded yet.</p>
-  {% endif %}
+  <!-- Pagination controls -->
+  <div>
+    {% if page_obj.has_previous %}
+      <a href="?page={{ page_obj.previous_page_number }}">Previous</a>
+    {% endif %}
+    <span>Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+    {% if page_obj.has_next %}
+      <a href="?page={{ page_obj.next_page_number }}">Next</a>
+    {% endif %}
+  </div>
 
-  <a href="{% url 'upload_cv' %}" class="btn btn-primary mt-3">Upload More CVs</a>
-</div>
-</body>
-</html>
+{% else %}
+  <p>No CVs found.</p>
+{% endif %}
