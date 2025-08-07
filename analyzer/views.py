@@ -9,8 +9,15 @@ from .models import CVUpload
 from .forms import CVUploadForm
 from .parser import CVParser
 from .cv_scorer import CVScorer
+from .serializers import CVUploadSerializer
 import os
 from django.core.paginator import Paginator
+from rest_framework.decorators import api_view, parser_classes,permission_classes
+from rest_framework.parsers import MultiPartParser
+from rest_framework.response import Response
+from rest_framework import status
+from django.core.files.storage import default_storage
+from rest_framework.permissions import IsAuthenticated
 # Fix your import path as per your folder structure:
 from utiliy.suggestions import generate_resume_suggestions
 
@@ -19,7 +26,7 @@ from django.contrib.auth.decorators import login_required
 
 
 @login_required
-def upload_cv(request):
+def upload_cv(request): # it is the function to handle the CV upload and processing .so we can upload the CV and process it for scoring and suggestions.
     if request.method == "POST":
         print(">>> Received POST")
         form = CVUploadForm(request.POST, request.FILES)
@@ -113,13 +120,14 @@ def upload_cv(request):
 
 
 @login_required
-def cv_rank(request):
+def cv_rank(request): # This view displays the top 5 CVs based on their overall score and  it also allows recuritment team to see the top CVs and the cv 
+    # details of the CVs.
     top_cvs = CVUpload.objects.filter(processed=True).order_by('-overall_score')[:5]
     return render(request, "analyzer/cv_rank.html", {"cvs": top_cvs})
 
 
 
-def results(request):
+def results(request): # This view is used to diaplay the results of the cvs that have been processed and uploaded by the user.
     cvs = CVUpload.objects.filter(processed=True).order_by('-uploaded_at')
     
     
@@ -132,12 +140,12 @@ def results(request):
     
 
 @login_required
-def cv_detail(request, cv_id):
+def cv_detail(request, cv_id): # This view displays the details of a specific CV including its scores and suggestions.
     cv = get_object_or_404(CVUpload, id=cv_id, processed=True)
     return render(request, "analyzer/cv_detail.html", {"cv": cv})
 
 @login_required
-def delete_cv(request, cv_id):
+def delete_cv(request, cv_id): # This view handles the deletion of a CV and its associated file.
     if request.method == "POST":
         cv = get_object_or_404(CVUpload, id=cv_id)
 
@@ -152,72 +160,110 @@ def delete_cv(request, cv_id):
 
 @login_required
 @csrf_exempt
-def api_upload(request):
-    """API endpoint for uploading CVs"""
-    if request.method == "POST":
-        files = request.FILES.getlist("files")
-        if not files:
-            return JsonResponse({"error": "No files provided"}, status=400)
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+@parser_classes([MultiPartParser])
+def api_upload(request): # This API endpoint allows users to upload multiple CV files for analysis.
+    """
+    API endpoint for uploading and analyzing CVs
+    Accepts multiple files with 'files[]' parameter
+    Returns analysis results including scores and suggestions
+    """
+    if 'files[]' not in request.FILES:
+        return Response(
+            {'error': 'No files provided. Use "files[]" parameter.'},
+            status=status.HTTP_400_BAD_REQUEST
+        )
 
-        results = []
-        parser = CVParser()
-        scorer = CVScorer()
+    files = request.FILES.getlist('files[]')
+    job_name = request.data.get('job_name', '')
+    results = []
+    parser = CVParser()
+    scorer = CVScorer()
 
-        for file in files:
-            try:
-                # Basic validation
-                allowed_extensions = [".pdf", ".doc", ".docx", ".txt"]
-                file_ext = os.path.splitext(file.name)[1].lower()
+    for file in files:
+        file_data = {
+            'filename': file.name,
+            'error': None,
+            'status': 'success'
+        }
 
-                if file_ext not in allowed_extensions:
-                    results.append(
-                        {"filename": file.name, "error": "Unsupported file format"}
-                    )
-                    continue
+        try:
+            # Validate file
+            file_ext = os.path.splitext(file.name)[1].lower()
+            if file_ext not in ['.pdf', '.doc', '.docx', '.txt']:
+                raise ValueError(f"Unsupported file format: {file_ext}")
 
-                # Create and process CV
-                cv_upload = CVUpload(file=file, filename=file.name)
-                cv_upload.save()
+            if file.size > 5 * 1024 * 1024:  # 5MB limit
+                raise ValueError("File size exceeds 5MB limit")
 
-                # Parse and score
-                parsed_data = parser.parse_cv(cv_upload.file.path, file_ext)
-                scoring_results = scorer.score_cv(parsed_data)
+            # Create and save CVUpload instance
+            cv_upload = CVUpload(
+                user=request.user,
+                file=file,
+                filename=file.name,
+                job_name=job_name
+            )
+            cv_upload.save()
 
-                # Update CV with results
-                cv_upload.raw_text = parsed_data["raw_text"]
-                cv_upload.contact_info = parsed_data["contact_info"]
-                cv_upload.experience = parsed_data["experience"]
-                cv_upload.education = parsed_data["education"]
-                cv_upload.skills = parsed_data["skills"]
-                cv_upload.overall_score = scoring_results["overall_score"]
-                cv_upload.contact_score = scoring_results["scores"]["contact"]
-                cv_upload.experience_score = scoring_results["scores"]["experience"]
-                cv_upload.education_score = scoring_results["scores"]["education"]
-                cv_upload.skills_score = scoring_results["scores"]["skills"]
-                cv_upload.format_score = scoring_results["scores"]["format"]
-                cv_upload.suggestions = scoring_results["suggestions"]
-                cv_upload.processed = True
-                cv_upload.save()
+            # Process the CV
+            file_path = default_storage.path(cv_upload.file.name)
+            parsed_data = parser.parse_cv(file_path, file_ext)
+            scoring_results = scorer.score_cv(parsed_data)
 
-                results.append(
-                    {
-                        "id": cv_upload.id,
-                        "filename": cv_upload.filename,
-                        "overall_score": cv_upload.overall_score,
-                        "scores": {
-                            "contact": cv_upload.contact_score,
-                            "experience": cv_upload.experience_score,
-                            "education": cv_upload.education_score,
-                            "skills": cv_upload.skills_score,
-                            "format": cv_upload.format_score,
-                        },
-                        "suggestions": cv_upload.suggestions,
-                    }
-                )
+            # Update CVUpload with analysis results
+            cv_upload.raw_text = parsed_data.get('raw_text', '')
+            cv_upload.contact_info = parsed_data.get('contact_info', '')
+            cv_upload.experience = parsed_data.get('experience', '')
+            cv_upload.education = parsed_data.get('education', '')
+            cv_upload.skills = parsed_data.get('skills', '')
 
-            except Exception as e:
-                results.append({"filename": file.name, "error": str(e)})
+            scores = scoring_results.get('scores', {})
+            cv_upload.overall_score = scoring_results.get('overall_score', 0)
+            cv_upload.contact_score = scores.get('contact', 0)
+            cv_upload.experience_score = scores.get('experience', 0)
+            cv_upload.education_score = scores.get('education', 0)
+            cv_upload.skills_score = scores.get('skills', 0)
+            cv_upload.format_score = scores.get('format', 0)
 
-        return JsonResponse({"results": results})
+            # Generate suggestions
+            resume_text = parsed_data.get('raw_text', '')
+            job_suggestions = generate_resume_suggestions(resume_text, job_name)
+            existing_suggestions = scoring_results.get('suggestions', '')
+            cv_upload.suggestions = f"{existing_suggestions}\n{job_suggestions}".strip()
+            
+            cv_upload.processed = True
+            cv_upload.save()
 
-    return JsonResponse({"error": "Invalid request method"}, status=405)
+            # Prepare response data
+            file_data.update({
+                'id': cv_upload.id,
+                'overall_score': cv_upload.overall_score,
+                'scores': {
+                    'contact': cv_upload.contact_score,
+                    'experience': cv_upload.experience_score,
+                    'education': cv_upload.education_score,
+                    'skills': cv_upload.skills_score,
+                    'format': cv_upload.format_score,
+                },
+                'suggestions': cv_upload.suggestions,
+                'processed_at': cv_upload.uploaded_at
+            })
+
+        except Exception as e:
+            file_data.update({
+                'error': str(e),
+                'status': 'failed'
+            })
+            # Clean up if file was saved but processing failed
+            if 'cv_upload' in locals() and cv_upload.pk:
+                cv_upload.file.delete(save=False)
+                cv_upload.delete()
+
+        results.append(file_data)
+
+    return Response({
+        'count': len(results),
+        'success_count': len([r for r in results if r['status'] == 'success']),
+        'results': results
+    })
