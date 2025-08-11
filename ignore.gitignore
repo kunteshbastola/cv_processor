@@ -20,3 +20,6 @@ __pycache__/
 
 # Migrations (optional if you prefer clean)
 */migrations/__pycache__/
+
+# Ignore environment variables
+*.env

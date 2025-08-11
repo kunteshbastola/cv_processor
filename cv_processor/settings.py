@@ -145,3 +145,9 @@ FILE_UPLOAD_MAX_MEMORY_SIZE = 10 * 1024 * 1024  # 10MB
 DATA_UPLOAD_MAX_MEMORY_SIZE = 10 * 1024 * 1024   # 10MB
 
 LOGIN_REDIRECT_URL = '/upload_cv/'  # or use reverse('upload_cv') in views
+
+# SECRET_KEY = '*)n9_1gg4h2((q4zrg2y=0zpb6k1is7^8gtsf#lr@l2rss$tz4'
+
+from decouple import config
+
+SECRET_KEY = config('SECRET_KEY')
