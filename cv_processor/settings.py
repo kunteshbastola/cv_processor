@@ -78,14 +78,16 @@ WSGI_APPLICATION = 'cv_processor.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
+
+import dj_database_url
+
+
+import os
+
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'cv_processor_db',
-        'USER': 'postgres',
-        'PASSWORD': 'kuntesh7',
-        'HOST': 'localhost',  
-    }
+    'default': dj_database_url.config(
+        default=os.environ.get('postgresql://cv_processor_user:aOvapSzVEUzV8BLDUPPUnxFaE6C1IP38@dpg-d2crvqvdiees73fvko8g-a/cv_processor')
+    )
 }
 
 
