@@ -86,7 +86,7 @@ import os
 
 DATABASES = {
     'default': dj_database_url.config(
-        default=os.environ.get('postgresql://cv_processor_user:aOvapSzVEUzV8BLDUPPUnxFaE6C1IP38@dpg-d2crvqvdiees73fvko8g-a/cv_processor')
+        default=os.environ.get('DATABASE_URL')
     )
 }
 
