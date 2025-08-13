@@ -1,15 +1,29 @@
+# Django & Deployment
 Django>=5.0,<6.0
 gunicorn
 psycopg2-binary
 dj-database-url
 whitenoise
+
+# Environment & Config
 python-decouple
+python-dotenv
+
+# REST & API
 djangorestframework
 django-cors-headers
+
+# Authentication
 django-allauth
+PyJWT==2.8.0
+cryptography
+
+# CV Processing
 python-docx
 PyPDF2
-python-dotenv
-requests
-PyJWT==2.*
 nltk
+requests
+
+# Optional / Testing
+pytest
+pytest-django
