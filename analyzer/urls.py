@@ -3,7 +3,7 @@ from . import views
 
 urlpatterns = [
     # HTML page
-    path(' ', views.upload_cv, name='upload'),
+    path('', views.upload_cv, name='upload'),
     path('upload/', views.upload_cv, name='upload'),
 
     # API endpoints
