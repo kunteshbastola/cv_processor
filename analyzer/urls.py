@@ -11,5 +11,6 @@ urlpatterns = [
     path('cv-rank/', views.cv_rank, name='cv_rank'),  # NEW: Top 5 from all users    # List of processed CVs
     path('cv/<int:cv_id>/', views.cv_detail, name='cv_detail'),  # Detail page for a CV
     path('cv/<int:cv_id>/delete/', views.delete_cv, name='delete_cv'),
-    path('accounts/', include('django.contrib.auth.urls')),  
+    path('accounts/', include('allauth.urls')),
+
 ]

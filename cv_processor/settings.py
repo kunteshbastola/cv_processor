@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
 from pathlib import Path
+import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -36,7 +37,16 @@ INSTALLED_APPS = [
     'analyzer',
     'rest_framework',
     'corsheaders',
+    'django.contrib.sites',  # Required for allauth
+
+    # Allauth
+    'allauth',
+    'allauth.account',
+    'allauth.socialaccount',
+    'allauth.socialaccount.providers.google',
 ]
+
+SITE_ID = 1
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -44,14 +54,21 @@ MIDDLEWARE = [
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'allauth.account.middleware.AccountMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'corsheaders.middleware.CorsMiddleware',
 ]
 
+
+AUTHENTICATION_BACKENDS = [
+    'django.contrib.auth.backends.ModelBackend',  # default
+    'allauth.account.auth_backends.AuthenticationBackend',  # allauth
+]
+
 CORS_ALLOW_ALL_ORIGINS = True  # Allow frontend access from anywhere
 
-ROOT_URLCONF = 'cv_processor_clean.urls'
+ROOT_URLCONF = 'cv_processor.urls'
 
 TEMPLATES = [
     {
@@ -68,21 +85,16 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'cv_processor_clean.wsgi.application'
+WSGI_APPLICATION = 'cv_processor.wsgi.application'
 
 
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
 
-import dj_database_url
-
-
-import os
 
 # Add these at the top of your settings.py
-import os
-import dj_database_url
+
 
 # Set debug to False in production
 DEBUG = os.environ.get('DEBUG', 'False') == 'True'
@@ -91,12 +103,45 @@ DEBUG = os.environ.get('DEBUG', 'False') == 'True'
 ALLOWED_HOSTS = ['*']  # Update this with your actual domain later
 
 # Database configuration
-DATABASES = {
-    'default': dj_database_url.config(
-        default=os.environ.get('DATABASE_URL'),
-        conn_max_age=600
-    )
+
+import dj_database_url
+
+if os.environ.get('DATABASE_URL'):
+    # Production: PostgreSQL
+    DATABASES = {
+        'default': dj_database_url.config(conn_max_age=600, ssl_require=True)
+    }
+else:
+    # Local: SQLite
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
+        }
+    }
+
+
+
+from dotenv import load_dotenv
+load_dotenv()  # Load .env file
+
+SECRET_KEY = os.getenv('SECRET_KEY')  # Get from environment
+if not SECRET_KEY:
+    raise ValueError("SECRET_KEY not set!")
+
+
+
+
+SOCIALACCOUNT_PROVIDERS = {
+    'google': {
+        'APP': {
+            'client_id': os.getenv('GOOGLE_CLIENT_ID'),
+            'secret': os.getenv('GOOGLE_CLIENT_SECRET'),
+            'key': ''
+        }
+    }
 }
+
 
 # Static files (CSS, JavaScript, Images)
 STATIC_URL = '/static/'
@@ -140,16 +185,39 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 
+# REST FRAMEWORK
+REST_FRAMEWORK = {
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.IsAuthenticated',
+    ],
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.SessionAuthentication',
+        'rest_framework.authentication.TokenAuthentication',
+    ],
+}
+
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
+
+# SECURITY SETTINGS FOR PRODUCTION
+if not DEBUG:
+    CSRF_COOKIE_SECURE = True
+    SESSION_COOKIE_SECURE = True
+    SECURE_BROWSER_XSS_FILTER = True
+    SECURE_CONTENT_TYPE_NOSNIFF = True
+    SECURE_SSL_REDIRECT = True
+
+# OPTIONAL: EMAIL SETTINGS FOR ALLAUTH (Google)
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+
 # File upload settings
 FILE_UPLOAD_MAX_MEMORY_SIZE = 10 * 1024 * 1024  # 10MB
 DATA_UPLOAD_MAX_MEMORY_SIZE = 10 * 1024 * 1024   # 10MB
 
-LOGIN_REDIRECT_URL = '/upload_cv/'  # or use reverse('upload_cv') in views
+LOGIN_URL = '/accounts/google/login/'  
 
 LOGOUT_REDIRECT_URL = '/'  # or use reverse('home') in views

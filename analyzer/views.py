@@ -158,8 +158,7 @@ def delete_cv(request, cv_id): # This view handles the deletion of a CV and its 
 
     return redirect("results")
 
-@login_required
-@csrf_exempt
+
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 @parser_classes([MultiPartParser])

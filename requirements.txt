@@ -6,3 +6,8 @@ whitenoise
 python-decouple
 djangorestframework
 django-cors-headers
+django-allauth
+python-docx
+PyPDF2
+python-dotenv
+requests
