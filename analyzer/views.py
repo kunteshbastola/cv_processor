@@ -119,45 +119,51 @@ def upload_cv(request): # it is the function to handle the CV upload and process
     return render(request, "analyzer/upload.html", {"form": form})
 
 
-@login_required
-def cv_rank(request): # This view displays the top 5 CVs based on their overall score and  it also allows recuritment team to see the top CVs and the cv 
-    # details of the CVs.
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def api_cv_rank(request):
     top_cvs = CVUpload.objects.filter(processed=True).order_by('-overall_score')[:5]
-    return render(request, "analyzer/cv_rank.html", {"cvs": top_cvs})
+    serializer = CVUploadSerializer(top_cvs, many=True)
+    return Response(serializer.data)
 
 
 
-def results(request): # This view is used to diaplay the results of the cvs that have been processed and uploaded by the user.
+from rest_framework.pagination import PageNumberPagination
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def api_results(request):
     cvs = CVUpload.objects.filter(processed=True).order_by('-uploaded_at')
     
-    
-    # Pagination (we'll set 10 CVs per page)
-    paginator = Paginator(cvs, 10)  # 10 CVs per page
-    page_number = request.GET.get('page')
-    page_obj = paginator.get_page(page_number)
-
-    return render(request, "analyzer/results.html", {"page_obj": page_obj})
-    
+    paginator = PageNumberPagination()
+    paginator.page_size = 10
+    result_page = paginator.paginate_queryset(cvs, request)
+    serializer = CVUploadSerializer(result_page, many=True)
+    return paginator.get_paginated_response(serializer.data)
 
 
-@login_required
-def cv_detail(request, cv_id): # This view displays the details of a specific CV including its scores and suggestions.
+ # This view displays the details of a specific CV including its scores and suggestions.
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def api_cv_detail(request, cv_id):
     cv = get_object_or_404(CVUpload, id=cv_id, processed=True)
-    return render(request, "analyzer/cv_detail.html", {"cv": cv})
+    serializer = CVUploadSerializer(cv)
+    return Response(serializer.data)
 
-@login_required
-def delete_cv(request, cv_id): # This view handles the deletion of a CV and its associated file.
-    if request.method == "POST":
-        cv = get_object_or_404(CVUpload, id=cv_id)
+# This view handles the deletion of a CV and its associated file.
 
-        # Delete the file from storage
-        if cv.file:
-            default_storage.delete(cv.file.name)
+@api_view(['DELETE'])
+@permission_classes([IsAuthenticated])
+def api_delete_cv(request, cv_id):
+    cv = get_object_or_404(CVUpload, id=cv_id, user=request.user)
+    
+    # Delete file from storage
+    if cv.file:
+        default_storage.delete(cv.file.name)
+    cv.delete()
+    
+    return Response({"message": "CV deleted successfully"}, status=status.HTTP_204_NO_CONTENT)
 
-        cv.delete()
-        messages.success(request, "CV deleted successfully.")
-
-    return redirect("results")
 
 
 @api_view(['POST'])
