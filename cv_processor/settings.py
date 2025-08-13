@@ -247,6 +247,9 @@ if not DEBUG:
     SECURE_CONTENT_TYPE_NOSNIFF = True
     SECURE_SSL_REDIRECT = True
 
+
+SESSION_COOKIE_AGE = 1209600  # 2 weeks in seconds
+
 # OPTIONAL: EMAIL SETTINGS FOR ALLAUTH (Google)
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
