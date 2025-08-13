@@ -11,4 +11,5 @@ python-docx
 PyPDF2
 python-dotenv
 requests
-PyJWT==2.x.x
+PyJWT==2.*
+nltk
