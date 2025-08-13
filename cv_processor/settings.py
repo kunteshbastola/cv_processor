@@ -215,6 +215,20 @@ ALLOWED_HOSTS = [
     '.onrender.com',                # Allow any subdomain for Render
 ]
 
+# settings.py
+SESSION_COOKIE_SECURE = False  # True only if using HTTPS
+CSRF_COOKIE_SECURE = False     # Same here
+SESSION_ENGINE = 'django.contrib.sessions.backends.db'  # default
+
+
+# settings.py
+CORS_ALLOW_CREDENTIALS = True
+CORS_ALLOWED_ORIGINS = [
+    'http://localhost:8000', 
+    'https://cv-processor-1.onrender.com'
+]
+
+
 
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
