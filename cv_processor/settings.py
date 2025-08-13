@@ -196,6 +196,11 @@ REST_FRAMEWORK = {
     ],
 }
 
+ALLOWED_HOSTS = [
+    'localhost',               # local testing
+    '127.0.0.1',               # local IP
+    'your-app.onrender.com',   # production domain
+]
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
