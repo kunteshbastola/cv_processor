@@ -19,13 +19,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-#(_$!f75aih+d(4pxtz@vd(-02m@iioz14fe)y3^3ypbknuad&'
 
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
 
-ALLOWED_HOSTS = ['*']  # Allow all hosts for development; restrict in production
+
 
 
 # Application definition
@@ -55,7 +51,7 @@ MIDDLEWARE = [
 
 CORS_ALLOW_ALL_ORIGINS = True  # Allow frontend access from anywhere
 
-ROOT_URLCONF = 'cv_processor.urls'
+ROOT_URLCONF = 'cv_processor_clean.urls'
 
 TEMPLATES = [
     {
@@ -72,7 +68,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'cv_processor.wsgi.application'
+WSGI_APPLICATION = 'cv_processor_clean.wsgi.application'
 
 
 # Database
@@ -84,13 +80,27 @@ import dj_database_url
 
 import os
 
+# Add these at the top of your settings.py
+import os
+import dj_database_url
+
+# Set debug to False in production
+DEBUG = os.environ.get('DEBUG', 'False') == 'True'
+
+# Allowed hosts
+ALLOWED_HOSTS = ['*']  # Update this with your actual domain later
+
+# Database configuration
 DATABASES = {
     'default': dj_database_url.config(
-        default=os.environ.get('DATABASE_URL')
+        default=os.environ.get('DATABASE_URL'),
+        conn_max_age=600
     )
 }
 
-
+# Static files (CSS, JavaScript, Images)
+STATIC_URL = '/static/'
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 # Password validation
 # https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
 
@@ -125,15 +135,11 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
-STATIC_URL = 'static/'
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
-DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-STATIC_URL = '/static/'
-STATICFILES_DIRS = [BASE_DIR / 'static']
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
@@ -146,8 +152,4 @@ DATA_UPLOAD_MAX_MEMORY_SIZE = 10 * 1024 * 1024   # 10MB
 
 LOGIN_REDIRECT_URL = '/upload_cv/'  # or use reverse('upload_cv') in views
 
-# SECRET_KEY = '*)n9_1gg4h2((q4zrg2y=0zpb6k1is7^8gtsf#lr@l2rss$tz4'
-
-from decouple import config
-
-SECRET_KEY = config('SECRET_KEY')
+LOGOUT_REDIRECT_URL = '/'  # or use reverse('home') in views
