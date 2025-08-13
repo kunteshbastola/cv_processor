@@ -242,4 +242,8 @@ DATA_UPLOAD_MAX_MEMORY_SIZE = 10 * 1024 * 1024   # 10MB
 
 LOGIN_URL = '/accounts/google/login/'  
 
-LOGOUT_REDIRECT_URL = '/'  # or use reverse('home') in views
+# settings.py
+LOGIN_REDIRECT_URL = '/'  # Or any URL in your site
+LOGOUT_REDIRECT_URL = '/'  # Optional
+
+
