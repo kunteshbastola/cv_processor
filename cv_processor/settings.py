@@ -264,3 +264,4 @@ LOGIN_REDIRECT_URL = '/'  # Or any URL in your site
 LOGOUT_REDIRECT_URL = '/'  # Optional
 
 
+STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"

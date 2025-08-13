@@ -22,3 +22,9 @@ __pycache__/
 # Migrations (optional if you prefer clean)
 */migrations/__pycache__/
 
+
+# Media files (user uploads)
+media/
+
+# Static files collected by collectstatic
+staticfiles/
