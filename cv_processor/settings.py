@@ -48,6 +48,9 @@ INSTALLED_APPS = [
 
 SITE_ID = 1
 
+INSTALLED_APPS += ['rest_framework.authtoken']
+
+
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
@@ -123,11 +126,9 @@ else:
 
 
 from dotenv import load_dotenv
-load_dotenv()  # Load .env file
+load_dotenv()
 
-SECRET_KEY = os.getenv('SECRET_KEY')  # Get from environment
-if not SECRET_KEY:
-    raise ValueError("SECRET_KEY not set!")
+SECRET_KEY = os.getenv('SECRET_KEY')
 
 
 
