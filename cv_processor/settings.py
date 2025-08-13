@@ -50,6 +50,7 @@ SITE_ID = 1
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -99,8 +100,7 @@ WSGI_APPLICATION = 'cv_processor.wsgi.application'
 # Set debug to False in production
 DEBUG = os.environ.get('DEBUG', 'False') == 'True'
 
-# Allowed hosts
-ALLOWED_HOSTS = ['*']  # Update this with your actual domain later
+
 
 # Database configuration
 
@@ -197,10 +197,15 @@ REST_FRAMEWORK = {
 }
 
 ALLOWED_HOSTS = [
-    'localhost',               # local testing
-    '127.0.0.1',               # local IP
-    'your-app.onrender.com',   # production domain
+    'localhost',
+    '127.0.0.1',
+    'cv-processor-1.onrender.com',  # Your Render app URL
+    '.onrender.com',                # Allow any subdomain for Render
 ]
+
+
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
