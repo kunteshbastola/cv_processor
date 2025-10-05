@@ -1,17 +1,99 @@
-<form method="post" enctype="multipart/form-data">
-  {% csrf_token %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Upload CVs</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 700px;
+            margin: 2rem auto;
+            padding: 1rem;
+            background: #f9f9f9;
+            border-radius: 6px;
+            box-shadow: 0 0 8px #ccc;
+        }
+        h1 {
+            text-align: center;
+            margin-bottom: 1.5rem;
+        }
+        form {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+        label {
+            font-weight: bold;
+        }
+        input[type="file"] {
+            padding: 0.5rem;
+        }
+        input[type="text"], select {
+            padding: 0.5rem;
+            font-size: 1rem;
+        }
+        button {
+            padding: 0.75rem;
+            font-size: 1.1rem;
+            background: #007bff;
+            border: none;
+            color: white;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        .options {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+        .error {
+            color: red;
+            margin-bottom: 1rem;
+        }
+    </style>
+</head>
+<body>
 
-  <label for="job_name">Job Role:</label>
-  <input type="text" name="job_name" id="job_name" required>
+    <h1>Upload Your CV(s)</h1>
 
-  <label for="cv_files">Upload CV(s):</label>
-  <input type="file" name="cv_files" id="cv_files" multiple required>
+    <!-- Show Django form errors here -->
+    {% if form.errors %}
+    <div class="error">
+        <ul>
+            {% for field in form %}
+                {% for error in field.errors %}
+                    <li>{{ error }}</li>
+                {% endfor %}
+            {% endfor %}
+            {% for error in form.non_field_errors %}
+                <li>{{ error }}</li>
+            {% endfor %}
+        </ul>
+    </div>
+    {% endif %}
 
-  <label for="action">Choose what to see after upload:</label>
-  <select name="action" id="action" required>
-    <option value="suggestions">Get Suggestions</option>
-    <option value="top5">See Top 5 CVs</option>
-  </select>
+    <form method="POST" enctype="multipart/form-data" action="{% url 'upload' %}">
+        {% csrf_token %}
 
-  <button type="submit">Upload CV(s)</button>
-</form>
+        <label for="cv_files">Select CV file(s):</label>
+        <input type="file" name="cv_files" id="cv_files" multiple required accept=".pdf,.doc,.docx,.txt" />
+
+        <label for="job_name">Job Name (optional):</label>
+        <input type="text" name="job_name" id="job_name" placeholder="e.g. Software Engineer" />
+
+        <div class="options">
+            <label><input type="checkbox" name="get_suggestions" checked /> Get Suggestions</label>
+            <label><input type="checkbox" name="top5" /> Show Top 5 Matches</label>
+            <label><input type="checkbox" name="match" /> Match Resumes</label>
+        </div>
+
+        <button type="submit">Upload & Analyze</button>
+    </form>
+
+</body>
+</html>

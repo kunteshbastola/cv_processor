@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>CV Details - {{ cv.filename }}</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 700px;
+            margin: 2rem auto;
+            padding: 1rem;
+            background: #fafafa;
+            border-radius: 6px;
+        }
+        h1 {
+            text-align: center;
+            margin-bottom: 1.5rem;
+        }
+        .section {
+            margin-bottom: 1.5rem;
+            background: white;
+            padding: 1rem;
+            border-radius: 4px;
+            box-shadow: 0 0 5px #ccc;
+        }
+        .section h2 {
+            margin-top: 0;
+            border-bottom: 1px solid #ddd;
+            padding-bottom: 0.3rem;
+            color: #007bff;
+        }
+        pre {
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            background: #f5f5f5;
+            padding: 1rem;
+            border-radius: 4px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 0.5rem;
+        }
+        th, td {
+            padding: 0.5rem 0.75rem;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+        th {
+            background: #007bff;
+            color: white;
+        }
+        a.back-link {
+            display: inline-block;
+            margin-top: 1rem;
+            color: #007bff;
+            text-decoration: none;
+        }
+        a.back-link:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>CV Details</h1>
+
+    <div class="section">
+        <h2>File Information</h2>
+        <p><strong>Filename:</strong> {{ cv.filename }}</p>
+        <p><strong>Job Name:</strong> {{ cv.job_name|default:"N/A" }}</p>
+        <p><strong>Uploaded At:</strong> {{ cv.uploaded_at }}</p>
+    </div>
+
+    <div class="section">
+        <h2>Scores</h2>
+        <table>
+            <tbody>
+                <tr><th>Overall Score</th><td>{{ cv.overall_score }}</td></tr>
+                <tr><th>Contact Info Score</th><td>{{ cv.contact_score }}</td></tr>
+                <tr><th>Experience Score</th><td>{{ cv.experience_score }}</td></tr>
+                <tr><th>Education Score</th><td>{{ cv.education_score }}</td></tr>
+                <tr><th>Skills Score</th><td>{{ cv.skills_score }}</td></tr>
+                <tr><th>Format Score</th><td>{{ cv.format_score }}</td></tr>
+                <tr><th>Matching Score</th><td>{{ cv.matching_score|default:"N/A" }}</td></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="section">
+        <h2>Suggestions</h2>
+        <pre>{{ cv.suggestions|default:"No suggestions available." }}</pre>
+    </div>
+
+    <a class="back-link" href="{% url 'matched_results' %}">&larr; Back to Matched Results</a>
+
+</body>
+</html>

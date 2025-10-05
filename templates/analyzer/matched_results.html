@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Matched CVs</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 900px;
+            margin: 2rem auto;
+            padding: 1rem;
+            background: #f0f0f0;
+            border-radius: 6px;
+        }
+        h1 {
+            text-align: center;
+            margin-bottom: 1.5rem;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        th, td {
+            padding: 0.75rem 1rem;
+            border-bottom: 1px solid #ddd;
+            text-align: left;
+        }
+        th {
+            background: #007bff;
+            color: white;
+        }
+        tr:hover {
+            background: #f5f5f5;
+        }
+        .no-results {
+            text-align: center;
+            margin-top: 2rem;
+            font-size: 1.2rem;
+            color: #777;
+        }
+        a.details-link {
+            color: #007bff;
+            text-decoration: none;
+        }
+        a.details-link:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Matched CVs</h1>
+
+    {% if cvs %}
+        <table>
+            <thead>
+                <tr>
+                    <th>Filename</th>
+                    <th>Job Name</th>
+                    <th>Matching Score (%)</th>
+                    <th>Overall Score</th>
+                    <th>View Details</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for cv in cvs %}
+                <tr>
+                    <td>{{ cv.filename }}</td>
+                    <td>{{ cv.job_name|default:"N/A" }}</td>
+                    <td>{{ cv.matching_score|default:"N/A" }}</td>
+                    <td>{{ cv.overall_score|default:"N/A" }}</td>
+                    <td><a class="details-link" href="{% url 'cv_detail' cv.id %}">Details</a></td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p class="no-results">No CVs matched your criteria.</p>
+    {% endif %}
+
+</body>
+</html>

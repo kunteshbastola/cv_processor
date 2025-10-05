@@ -1,0 +1,133 @@
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Upload CV for Suggestions</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 500px;
+            margin: 3rem auto;
+            padding: 1.5rem;
+            background: #f9f9f9;
+            border-radius: 8px;
+            box-shadow: 0 0 8px rgba(0,0,0,0.1);
+        }
+        h1 {
+            text-align: center;
+            margin-bottom: 2rem;
+            color: #333;
+        }
+        form {
+            display: flex;
+            flex-direction: column;
+            gap: 1.2rem;
+        }
+        label {
+            font-weight: bold;
+            margin-bottom: 0.3rem;
+        }
+        input[type="file"] {
+            padding: 0.3rem;
+        }
+        input[type="text"] {
+            padding: 0.5rem;
+            font-size: 1rem;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        button {
+            background-color: #007bff;
+            border: none;
+            color: white;
+            padding: 0.7rem;
+            font-size: 1.1rem;
+            cursor: pointer;
+            border-radius: 5px;
+            transition: background-color 0.3s ease;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .message {
+            margin-top: 1rem;
+            padding: 1rem;
+            border-radius: 6px;
+        }
+        .error {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+        .success {
+            background-color: #d4edda;
+            color: #155724;
+            white-space: pre-wrap;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Upload Your CV</h1>
+
+    <form id="uploadForm" enctype="multipart/form-data" method="post">
+        <label for="file">Select CV file (PDF, DOC, DOCX, TXT):</label>
+        <input type="file" id="file" name="file" required />
+
+        <label for="job_name">Job Name (optional):</label>
+        <input type="text" id="job_name" name="job_name" placeholder="e.g., Software Engineer" />
+
+        <button type="submit">Upload and Get Suggestions</button>
+    </form>
+
+    <div id="responseMessage" class="message" style="display:none;"></div>
+
+    <script>
+        const form = document.getElementById('uploadForm');
+        const responseMessage = document.getElementById('responseMessage');
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            responseMessage.style.display = 'none';
+            responseMessage.className = 'message';
+
+            const formData = new FormData(form);
+
+            try {
+                const response = await fetch('/api/upload-and-suggest/', {
+                    method: 'POST',
+                    body: formData,
+                    credentials: 'include', // Include cookies for auth if needed
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    responseMessage.textContent = data.error || 'An error occurred during upload.';
+                    responseMessage.classList.add('error');
+                } else {
+                    // Display success info with suggestions
+                    responseMessage.innerHTML = `
+                        <strong>Upload Successful!</strong><br/>
+                        <strong>Filename:</strong> ${data.filename}<br/>
+                        <strong>Overall Score:</strong> ${data.overall_score}<br/>
+                        <strong>Suggestions:</strong><br/>
+                        <pre>${data.suggestions}</pre>
+                    `;
+                    responseMessage.classList.add('success');
+                    form.reset();
+                }
+            } catch (error) {
+                responseMessage.textContent = 'Network error or server not responding.';
+                responseMessage.classList.add('error');
+            }
+
+            responseMessage.style.display = 'block';
+        });
+    </script>
+
+</body>
+</html>

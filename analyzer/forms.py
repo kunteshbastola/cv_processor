@@ -12,6 +12,33 @@ class CVUploadForm(forms.Form):
         })
     )
 
+    required_experience = forms.IntegerField(
+        required=False,
+        label="Minimum Years of Experience",
+        widget=forms.NumberInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'e.g. 2'
+        })
+    )
+
+    required_education = forms.CharField(
+        required=False,
+        label="Required Education Level",
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'e.g. Bachelor, Master, PhD'
+        })
+    )
+
+    required_skills = forms.CharField(
+        required=False,
+        label="Required Skills (comma-separated)",
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'e.g. Python, Excel, SQL'
+        })
+    )
+
     dummy = forms.CharField(
         required=False,
         widget=forms.HiddenInput()
