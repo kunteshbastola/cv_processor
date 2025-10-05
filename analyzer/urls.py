@@ -3,7 +3,7 @@ from . import views
 
 urlpatterns = [
     path('', views.upload_cv, name='upload'),
-    path('upload/', views.upload_cv, name='upload'),
+    path('upload_cv/', views.upload_cv, name='upload_cv'),
     path('results/<int:cv_id>/', views.matched_results, name='matched_results'),
     path('suggestions/', views.cv_suggestions, name='cv_suggestions'),
 
