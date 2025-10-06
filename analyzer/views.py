@@ -20,21 +20,15 @@ from django.core.files.storage import default_storage
 from rest_framework.permissions import IsAuthenticated
 # Fix your import path as per your folder structure:
 from utiliy.suggestions import generate_resume_suggestions
-
-
 from django.contrib.auth.decorators import login_required
 
 
-from django import forms
-from django.shortcuts import render, redirect, get_object_or_404
-from django.contrib import messages
-from django.contrib.auth.decorators import login_required
-from .models import CVUpload
-from .forms import CVUploadForm
-from .parser import CVParser
-from .cv_scorer import CVScorer
-from utiliy.suggestions import generate_resume_suggestions
-import os
+
+
+
+
+
+
 
 @login_required
 def upload_cv(request):
@@ -210,7 +204,7 @@ from django.shortcuts import render
 from django.contrib import messages
 
 @login_required
-def upload_and_suggest_html(request):
+def upload_and_suggest(request):
     if request.method == "POST":
         file = request.FILES.get("file")
         job_name = request.POST.get("job_name", "")
