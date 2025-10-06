@@ -78,22 +78,19 @@
     {% endif %}
 
     <form method="POST" enctype="multipart/form-data" action="{% url 'upload' %}">
-        {% csrf_token %}
+    {% csrf_token %}
 
-        <label for="cv_files">Select CV file(s):</label>
-        <input type="file" name="cv_files" id="cv_files" multiple required accept=".pdf,.doc,.docx,.txt" />
+    <label for="cv_files">Select CV file(s):</label>
+    <input type="file" name="cv_files" id="cv_files" multiple required accept=".pdf,.doc,.docx,.txt" />
 
-        <label for="job_name">Job Name (optional):</label>
-        <input type="text" name="job_name" id="job_name" placeholder="e.g. Software Engineer" />
+    <label for="job_name">Job Name (optional):</label>
+    <input type="text" name="job_name" id="job_name" placeholder="e.g. Software Engineer" />
 
-        <div class="options">
-            <label><input type="checkbox" name="get_suggestions" checked /> Get Suggestions</label>
-            <label><input type="checkbox" name="top5" /> Show Top 5 Matches</label>
-            <label><input type="checkbox" name="match" /> Match Resumes</label>
-        </div>
-
-        <button type="submit">Upload & Analyze</button>
-    </form>
-
+    <div class="options">
+        <button type="submit" name="action" value="suggestions">Get Suggestions</button>
+        <button type="submit" name="action" value="top5">Show Top 5 Matches</button>
+        <button type="submit" name="action" value="match">Match Resumes</button>
+    </div>
+</form>
 </body>
 </html>

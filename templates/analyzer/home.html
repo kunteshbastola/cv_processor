@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>CV Analyzer Home</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 3rem auto;
+            padding: 2rem;
+            background: #f9f9f9;
+            border-radius: 8px;
+            text-align: center;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            margin-bottom: 2rem;
+            color: #007bff;
+        }
+        .link-button {
+            display: block;
+            margin: 1rem auto;
+            padding: 1rem 2rem;
+            font-size: 1.1rem;
+            color: white;
+            background-color: #007bff;
+            text-decoration: none;
+            border-radius: 6px;
+            transition: background-color 0.3s;
+        }
+        .link-button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Welcome to CV Analyzer</h1>
+
+    <a href="{% url 'upload' %}" class="link-button">Upload CVs for Matching</a>
+    <a href="{% url 'upload_and_suggest' %}" class="link-button">Upload CV for Suggestions</a>
+
+</body>
+</html>
