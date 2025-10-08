@@ -192,10 +192,25 @@ from rest_framework.pagination import PageNumberPagination
 def matched_results(request):
     matched_ids = request.session.get("matched_cv_ids", [])
     cvs = CVUpload.objects.filter(id__in=matched_ids)
-
+    action = request.POST.get("action")
+    uploaded_cvs = CVUpload.objects.filter(user=request.user, processed=True)
     if not cvs.exists():
         messages.warning(request, "No CVs matched your criteria.")
         return render(request, "analyzer/matched_results.html", {"best_cv": None})
+    
+    elif action == "match":
+        matched_cvs = sorted(
+        [cv for cv in uploaded_cvs if cv.matching_score is not None],
+        key=lambda x: x.matching_score,
+        reverse=True
+    )
+
+    if not matched_cvs:  
+        # fallback: take best overall scored CV
+        matched_cvs = sorted(uploaded_cvs, key=lambda x: x.overall_score or 0, reverse=True)[:1]
+
+    request.session["matched_cv_ids"] = [cv.id for cv in matched_cvs]
+    return redirect("matched_results")
 
     # Pick the single best CV (highest matching_score)
     best_cv = max(cvs, key=lambda x: x.matching_score or 0)
