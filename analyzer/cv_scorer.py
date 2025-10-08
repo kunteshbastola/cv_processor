@@ -238,20 +238,21 @@ class CVScorer:
         
         # Score each section
         scores['contact'], all_suggestions['contact'] = self.score_contact_info(
-            parsed_data['contact_info'], parsed_data['raw_text']
+            parsed_data.get('contact_info', '') or '', parsed_data.get('raw_text', '') or ''
         )
         scores['experience'], all_suggestions['experience'] = self.score_experience(
-            parsed_data['experience']
+            parsed_data.get('experience', '') or ''
         )
         scores['education'], all_suggestions['education'] = self.score_education(
-            parsed_data['education']
+            parsed_data.get('education', '') or ''
         )
         scores['skills'], all_suggestions['skills'] = self.score_skills(
-            parsed_data['skills']
+            parsed_data.get('skills', '') or ''
         )
         scores['format'], all_suggestions['format'] = self.score_format(
-            parsed_data['raw_text']
+            parsed_data.get('raw_text', '') or ''
         )
+
         
         # Calculate overall score
         overall_score = self.calculate_overall_score(scores)

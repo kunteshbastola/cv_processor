@@ -19,10 +19,11 @@ class CVUpload(models.Model):
     
     # Analysis results
     overall_score = models.FloatField(null=True, blank=True)
-    contact_score = models.FloatField(null=True, blank=True)
+    contact_score = models.FloatField(null=True, blank=True)    
     experience_score = models.FloatField(null=True, blank=True)
     education_score = models.FloatField(null=True, blank=True)
     skills_score = models.FloatField(null=True, blank=True)
+    matching_score = models.FloatField(null=True, blank=True)
     format_score = models.FloatField(null=True, blank=True)
     
     # Extracted sections
