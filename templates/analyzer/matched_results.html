@@ -1,14 +1,53 @@
-<h2>Matched CVs for: {{ job_title }}</h2>
+{% extends "base.html" %}
+{% block content %}
+<h2>Matched CVs for "{{ job_title }}"</h2>
 
-{% for cv in matched_cvs %}
-<div style="border:1px solid #ccc; padding:15px; margin-bottom:20px;">
-    <h3>{{ cv.filename }} | Matching Score: {{ cv.matching_score }}%</h3>
-    <p><strong>Contact Info:</strong> {{ cv.contact_info }}</p>
-    <p><strong>Experience:</strong> {{ cv.experience|linebreaks }}</p>
-    <p><strong>Education:</strong> {{ cv.education|linebreaks }}</p>
-    <p><strong>Skills:</strong> {{ cv.skills|linebreaks }}</p>
-    <p><strong>Overall Score:</strong> {{ cv.overall_score }}</p>
-</div>
-{% empty %}
-<p>No CVs found.</p>
-{% endfor %}
+{% if cvs %}
+  <div class="cv-list">
+    {% for cv in cvs %}
+      <div class="cv-card" style="border:1px solid #ccc; padding:15px; margin-bottom:20px;">
+        <h3>{{ cv.filename }}</h3>
+        <p><strong>Overall Score:</strong> {{ cv.overall_score }}%</p>
+        <p><strong>Matching Score:</strong> {{ cv.matching_score }}%</p>
+
+        <!-- Matched Skills Preview -->
+        {% if cv.skills %}
+          <p><strong>Skills:</strong> {{ cv.skills|truncatechars:50 }}</p>
+        {% endif %}
+
+        <!-- Toggle detailed info -->
+        <button type="button" onclick="toggleDetails('details-{{ cv.id }}')">View More</button>
+        <div id="details-{{ cv.id }}" style="display:none; margin-top:10px;">
+          <p><strong>Contact Info:</strong> {{ cv.contact_info }}</p>
+          <p><strong>Experience:</strong><br>{{ cv.experience|linebreaks }}</p>
+          <p><strong>Education:</strong><br>{{ cv.education|linebreaks }}</p>
+          <p><strong>Skills:</strong><br>{{ cv.skills|linebreaks }}</p>
+
+          <h4>Section Scores:</h4>
+          <ul>
+            <li>Contact: {{ cv.contact_score }}%</li>
+            <li>Experience: {{ cv.experience_score }}%</li>
+            <li>Education: {{ cv.education_score }}%</li>
+            <li>Skills: {{ cv.skills_score }}%</li>
+            <li>Format: {{ cv.format_score }}%</li>
+          </ul>
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+
+{% else %}
+  <p>No CVs matched yet.</p>
+{% endif %}
+
+<script>
+function toggleDetails(id) {
+    var elem = document.getElementById(id);
+    if (elem.style.display === "none") {
+        elem.style.display = "block";
+    } else {
+        elem.style.display = "none";
+    }
+}
+</script>
+{% endblock %}

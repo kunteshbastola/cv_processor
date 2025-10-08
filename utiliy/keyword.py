@@ -510,7 +510,65 @@ KEYWORDS = {
         'music education', 'lesson planning', 'classroom management', 'student assessment',
         'communication', 'subject matter expertise', 'curriculum development', 'musical skills', 'performance'
     ],
-
+    'Data Scientist' : [
+        'python', 'r', 'statistics', 'machine learning', 'deep learning', 'data visualization',
+        'pandas', 'numpy', 'scikit-learn', 'tensorflow', 'pytorch'
+    ],
+    'Data Analyst' : [
+        'excel', 'sql', 'power bi', 'tableau', 'python', 'pandas', 'data visualization',
+        'statistics', 'data cleaning', 'regression', 'machine learning'
+    ],
+    'Machine Learning Engineer' : [
+        'python', 'tensorflow', 'pytorch', 'scikit-learn', 'keras', 'model deployment', 
+        'flask', 'fastapi', 'mlops', 'feature engineering', 'data preprocessing'
+    ],
+    'Software Engineer' : [
+        'python', 'java', 'c++', 'c#', 'javascript', 'react', 'node.js', 'git', 'agile', 
+        'software development lifecycle'
+    ],
+    'Web Developer' : [
+        'html', 'css', 'javascript', 'react', 'node.js', 'express', 'django', 'api', 'git', 'rest'
+    ], 
+    'Cloud Engineer' : [
+        'aws', 'azure', 'gcp', 'docker', 'kubernetes', 'terraform', 'cloud architecture',
+        'devops', 'ci/cd', 'infrastructure as code'
+    ],
+    'Cybersecurity Analyst' : [
+        'network security', 'penetration testing', 'firewalls', 'encryption', 'incident response',
+        'risk assessment', 'vulnerability assessment', 'siem', 'malware analysis'
+    ],
+    'Mobile Developer' : [
+        'android', 'ios', 'swift', 'kotlin', 'react native', 'flutter', 'mobile app development',
+        'api integration', 'git'
+    ],
+    'Database Administrator' : [
+        'sql', 'mysql', 'postgresql', 'oracle', 'database design', 'performance tuning',
+        'backup and recovery', 'data modeling', 'noSQL'
+    ],
+    'Network Engineer' : [
+        'network design', 'routing', 'switching', 'firewalls', 'vpn', 'tcp/ip', 'lan', 'wan',
+        'network security'
+    ],
+    'Business Analyst' : [
+        'requirements gathering', 'stakeholder management', 'process improvement', 'data analysis',
+        'project management', 'agile', 'scrum', 'business intelligence'
+    ],
+    'Product Manager' : [
+        'product strategy', 'roadmap', 'market research', 'user stories', 'agile', 'scrum',
+        'stakeholder management', 'ux design'
+    ],
+    'UI/UX Designer' : [
+        'user interface', 'user experience', 'wireframing', 'prototyping', 'adobe xd', 'figma',
+        'usability testing', 'interaction design', 'visual design'
+    ],
+    'Game Developer' : [
+        'unity', 'unreal engine', 'c#', 'c++', 'game design', '3d modeling', 'animation',
+        'game mechanics', 'multiplayer'
+    ],
+    'Data Engineer' : [
+        'python', 'sql', 'spark', 'hadoop', 'etl', 'data pipelines', 'big data', 'data warehousing',
+        'cloud data platforms'
+    ],
     
 
 

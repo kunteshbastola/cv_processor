@@ -80,7 +80,7 @@ def upload(request):
                     cv_upload.processed = True
 
                     # ===============================
-                    # Matching Score Logic
+                    # Improved Matching Score Logic
                     # ===============================
                     matching_score = 0
                     total_criteria = 0
@@ -88,13 +88,19 @@ def upload(request):
                     # Experience
                     if required_experience:
                         total_criteria += 1
-                        try:
-                            years = [int(s) for s in re.findall(r'\d+', cv_upload.experience)]
-                            max_years = max(years) if years else 0
-                            if max_years >= int(required_experience):
-                                matching_score += 1
-                        except:
-                            pass
+                        exp_text = cv_upload.experience
+                        exp_years = 0
+                        # Calculate total years from ranges like 2019-2022
+                        for match in re.findall(r'(\d{4})\s*-\s*(\d{4})', exp_text):
+                            start, end = int(match[0]), int(match[1])
+                            exp_years += max(0, end - start)
+                        # If only single years are mentioned, take difference from earliest year
+                        if exp_years == 0:
+                            years = [int(s) for s in re.findall(r'\b(19|20)\d{2}\b', exp_text)]
+                            if years:
+                                exp_years = max(years) - min(years)
+                        if exp_years >= int(required_experience):
+                            matching_score += 1
 
                     # Education
                     if required_education:
@@ -106,10 +112,12 @@ def upload(request):
                     if required_skills:
                         total_criteria += 1
                         cv_skills = [s.strip().lower() for s in re.split(r',|;', cv_upload.skills)]
-                        if len(set(required_skills) & set(cv_skills)) > 0:
-                            matching_score += 1
+                        if cv_skills:
+                            matched_skills = set(required_skills) & set(cv_skills)
+                            skill_ratio = len(matched_skills) / len(required_skills)
+                            matching_score += skill_ratio
 
-                    # Final matching score
+                    # Final matching score (percentage)
                     cv_upload.matching_score = round((matching_score / total_criteria) * 100, 2) if total_criteria else 0
                     cv_upload.save()
                     uploaded_cvs.append(cv_upload)
@@ -136,20 +144,10 @@ def upload(request):
 
 @login_required
 def matched_results(request):
-    cv_ids = request.session.get("matched_cv_ids", [])
+    matched_ids = request.session.get("matched_cv_ids", [])
+    cvs = CVUpload.objects.filter(id__in=matched_ids).order_by('-matching_score')
     job_title = request.session.get("job_title", "")
-
-    if not cv_ids:
-        return redirect("upload")
-
-    matched_cvs = CVUpload.objects.filter(id__in=cv_ids)
-    # Sort according to session order
-    matched_cvs = sorted(matched_cvs, key=lambda x: cv_ids.index(x.id))
-
-    return render(request, "analyzer/matched_results.html", {
-        "matched_cvs": matched_cvs,
-        "job_title": job_title
-    })
+    return render(request, "analyzer/matched_results.html", {"cvs": cvs, "job_title": job_title})
 
 
 
