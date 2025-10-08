@@ -30,20 +30,23 @@ def home(request):
 
 
 @login_required
+import os
+import re
+from django.shortcuts import render, redirect
+from django.contrib import messages
+from django.contrib.auth.decorators import login_required
+from .models import CVUpload
+from .forms import CVUploadForm
+from .parser import CVParser
+from .cv_scorer import CVScorer
+
+@login_required
 def upload(request):
     if request.method == "POST":
         form = CVUploadForm(request.POST, request.FILES)
         files = request.FILES.getlist("cv_files")
 
         if form.is_valid():
-            # Validate multiple files
-            try:
-                form.validate_multiple_files(files)
-            except forms.ValidationError as ve:
-                for error in ve.error_list:
-                    messages.error(request, error)
-                return render(request, "analyzer/upload.html", {"form": form})
-
             # Extract matching requirements
             required_experience = form.cleaned_data.get('required_experience')
             required_education = form.cleaned_data.get('required_education', '').lower()
@@ -86,16 +89,15 @@ def upload(request):
                     cv_upload.education_score = scores.get("education", 0)
                     cv_upload.skills_score = scores.get("skills", 0)
                     cv_upload.format_score = scores.get("format", 0)
-
                     cv_upload.processed = True
 
                     # ===============================
-                    # ✨ Matching Score Logic ✨
+                    # Matching Score Logic
                     # ===============================
                     matching_score = 0
                     total_criteria = 0
 
-                    # 1. Experience
+                    # Experience
                     if required_experience:
                         total_criteria += 1
                         try:
@@ -106,13 +108,13 @@ def upload(request):
                         except:
                             pass
 
-                    # 2. Education
+                    # Education
                     if required_education:
                         total_criteria += 1
                         if required_education in cv_upload.education.lower():
                             matching_score += 1
 
-                    # 3. Skills
+                    # Skills
                     if required_skills:
                         total_criteria += 1
                         cv_skills = [s.strip().lower() for s in re.split(r',|;', cv_upload.skills)]
@@ -132,7 +134,7 @@ def upload(request):
                 messages.error(request, "No valid files were processed.")
                 return redirect('upload_cv')
 
-            # Sort by matching score and redirect to matched results
+            # Sort by matching score and store IDs in session
             matched_cvs = sorted(uploaded_cvs, key=lambda x: x.matching_score, reverse=True)
             request.session["matched_cv_ids"] = [cv.id for cv in matched_cvs]
             return redirect("matched_results")
@@ -143,27 +145,13 @@ def upload(request):
     return render(request, "analyzer/upload.html", {"form": form})
 
 
-
-
-# @api_view(['GET'])
-# @permission_classes([IsAuthenticated])
-# def api_cv_rank(request):
-#     top_cvs = CVUpload.objects.filter(processed=True).order_by('-overall_score')[:5]
-#     serializer = CVUploadSerializer(top_cvs, many=True)
-#     return Response(serializer.data)
-
-
-
-from rest_framework.pagination import PageNumberPagination
-
-
-
-
 @login_required
 def matched_results(request):
- def matched_results(request):
     # Get matched CV IDs from session
     matched_ids = request.session.get("matched_cv_ids", [])
+    if not isinstance(matched_ids, list):
+        matched_ids = []
+
     cvs = CVUpload.objects.filter(id__in=matched_ids, user=request.user)
 
     if not cvs.exists():
@@ -171,9 +159,10 @@ def matched_results(request):
         return render(request, "analyzer/matched_results.html", {"best_cv": None})
 
     # Pick the single best CV (highest matching_score)
-    best_cv = max(cvs, key=lambda x: x.matching_score or 0)
+    best_cv = max(cvs, key=lambda x: x.matching_score if x.matching_score is not None else 0)
 
     return render(request, "analyzer/matched_results.html", {"best_cv": best_cv})
+
 
 
 
