@@ -28,18 +28,6 @@ def home(request):
     return render(request, "analyzer/home.html")
 
 
-
-@login_required
-import os
-import re
-from django.shortcuts import render, redirect
-from django.contrib import messages
-from django.contrib.auth.decorators import login_required
-from .models import CVUpload
-from .forms import CVUploadForm
-from .parser import CVParser
-from .cv_scorer import CVScorer
-
 @login_required
 def upload(request):
     if request.method == "POST":
