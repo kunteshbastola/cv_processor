@@ -155,6 +155,20 @@ def matched_results(request):
     except ValueError:
         # In case cvs is empty (should not happen), fallback
         best_cv = None
+    if best_cv:
+        # Prepare short snippets
+        best_cv_preview = {
+        "filename": best_cv.filename,
+        "matching_score": best_cv.matching_score,
+        "overall_score": best_cv.overall_score,
+        "skills": best_cv.skills[:200],       # first 200 chars
+        "education": best_cv.education[:200], # first 200 chars
+        "experience": best_cv.experience[:200], # first 200 chars
+        "suggestions": best_cv.suggestions.split('\n')[:5] if best_cv.suggestions else []
+        }
+    else:
+        best_cv_preview = None
+
 
     return render(request, "analyzer/matched_results.html", {"best_cv": best_cv})
 
@@ -162,6 +176,7 @@ def matched_results(request):
 
 
 
+@login_required
 @login_required
 def upload_and_suggest(request):
     if request.method == "POST":
@@ -193,33 +208,37 @@ def upload_and_suggest(request):
             parsed_data = parser.parse_cv(cv_upload.file.path, file_ext)
             scoring_results = scorer.score_cv(parsed_data)
 
-            cv_upload.raw_text = parsed_data.get('raw_text', '')
-            cv_upload.contact_info = parsed_data.get('contact_info', '')
-            cv_upload.experience = parsed_data.get('experience', '')
-            cv_upload.education = parsed_data.get('education', '')
-            cv_upload.skills = parsed_data.get('skills', '')
+            # Save parsed data safely
+            cv_upload.raw_text = parsed_data.get('raw_text', '') or ''
+            cv_upload.contact_info = parsed_data.get('contact_info', '') or ''
+            cv_upload.experience = parsed_data.get('experience', '') or ''
+            cv_upload.education = parsed_data.get('education', '') or ''
+            cv_upload.skills = parsed_data.get('skills', '') or ''
 
+            # Save scores safely
             scores = scoring_results.get('scores', {})
-            cv_upload.overall_score = scoring_results.get('overall_score', 0)
-            cv_upload.contact_score = scores.get('contact', 0)
-            cv_upload.experience_score = scores.get('experience', 0)
-            cv_upload.education_score = scores.get('education', 0)
-            cv_upload.skills_score = scores.get('skills', 0)
-            cv_upload.format_score = scores.get('format', 0)
+            cv_upload.overall_score = scoring_results.get('overall_score', 0) or 0
+            cv_upload.contact_score = scores.get('contact', 0) or 0
+            cv_upload.experience_score = scores.get('experience', 0) or 0
+            cv_upload.education_score = scores.get('education', 0) or 0
+            cv_upload.skills_score = scores.get('skills', 0) or 0
+            cv_upload.format_score = scores.get('format', 0) or 0
 
-            resume_text = parsed_data.get('raw_text', '')
-            job_suggestions = generate_resume_suggestions(resume_text, job_name)
-            existing_suggestions = scoring_results.get('suggestions', '')
+            # Generate suggestions safely
+            resume_text = parsed_data.get('raw_text', '') or ''
+            job_suggestions = generate_resume_suggestions(resume_text, job_name) or ''
+            existing_suggestions = scoring_results.get('suggestions', '') or ''
             combined_suggestions = f"{existing_suggestions}\n{job_suggestions}".strip()
+            cv_upload.suggestions = combined_suggestions[:1000]  # ✅ Limit to 1000 chars
 
-            cv_upload.suggestions = combined_suggestions
             cv_upload.processed = True
             cv_upload.save()
 
-            # Pass cv_upload to template to show results
+            # Pass cv_upload to template
             return render(request, "analyzer/upload_and_suggest_results.html", {"cv": cv_upload})
 
         except Exception as e:
+            # Clean up if processing fails
             cv_upload.file.delete(save=False)
             cv_upload.delete()
             messages.error(request, f"Error processing file: {str(e)}")
@@ -229,16 +248,24 @@ def upload_and_suggest(request):
     return render(request, "analyzer/upload_and_suggest.html")
 
 
+
  # This view displays the details of a specific CV including its scores and suggestions.
 
 @login_required
 def cv_suggestions(request, cv_id):
     cv = get_object_or_404(CVUpload, id=cv_id, user=request.user, processed=True)
-    
+
+    # Ensure suggestions is a string and limit its length for display
+    safe_suggestions = (cv.suggestions or "").strip()
+    if len(safe_suggestions) > 1000:
+        safe_suggestions = safe_suggestions[:1000] + "..."  # show first 1000 chars
+
     context = {
         "cv": cv,
+        "suggestions": safe_suggestions,
     }
     return render(request, "analyzer/cv_suggestions.html", context)
+
 
 
 # This view handles the deletion of a CV and its associated file.

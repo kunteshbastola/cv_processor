@@ -2,70 +2,23 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Matched CV Result</title>
+    <title>Upload CV</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            max-width: 700px;
-            margin: 2rem auto;
-            padding: 1.5rem;
-            background: #f9f9f9;
-            border-radius: 8px;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
-        }
-        h1 {
-            text-align: center;
-            margin-bottom: 1.5rem;
-        }
-        .cv-card {
-            padding: 1.5rem;
-            background: #fff;
-            border: 1px solid #ddd;
-            border-radius: 6px;
-        }
-        .cv-card p {
-            margin: 0.5rem 0;
-        }
-        .score {
-            font-weight: bold;
-            color: #007bff;
-        }
-        .back-home {
-            display: inline-block;
-            margin-top: 1.5rem;
-            padding: 0.6rem 1rem;
-            background: #6c757d;
-            color: white;
-            text-decoration: none;
-            border-radius: 4px;
-        }
-        .back-home:hover {
-            background: #5a6268;
-        }
+        body { font-family: Arial; max-width: 500px; margin: 3rem auto; }
+        input[type=file] { display:block; margin-bottom:1rem; }
+        input[type=submit] { padding:0.5rem 1rem; background:#007bff; color:white; border:none; border-radius:4px; cursor:pointer; }
+        input[type=submit]:hover { background:#0056b3; }
     </style>
 </head>
 <body>
-
-<h1>Matched CV Result</h1>
-
-{% if best_cv %}
-<div class="cv-card">
-    <p><strong>Filename:</strong> {{ best_cv.filename|default:"N/A" }}</p>
-    <p><strong>Job Name:</strong> {{ best_cv.job_name|default:"N/A" }}</p>
-    <p class="score"><strong>Matching Score:</strong> {{ best_cv.matching_score|default:"0" }}%</p>
-    <p><strong>Overall Score:</strong> {{ best_cv.overall_score|default:"0" }}</p>
-    <p><strong>Experience:</strong> {{ best_cv.experience|default:"N/A" }}</p>
-    <p><strong>Education:</strong> {{ best_cv.education|default:"N/A" }}</p>
-    <p><strong>Skills:</strong> {{ best_cv.skills|default:"N/A" }}</p>
-    <p><strong>Uploaded At:</strong> {{ best_cv.uploaded_at|date:"Y-m-d H:i"|default:"N/A" }}</p>
-</div>
-{% else %}
-<p>No CVs matched your criteria.</p>
-{% endif %}
-
-<a href="{% url 'upload_cv' %}" class="back-home">⬅ Back to Upload</a>
-<a href="{% url 'home' %}" class="back-home">🏠 Home</a>
-
+    <h1>Upload Your CV</h1>
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <label for="file">Select CV (PDF, DOCX, TXT):</label>
+        <input type="file" name="file" id="file" accept=".pdf,.doc,.docx,.txt" required>
+        <label for="job_name">Job Name (optional):</label>
+        <input type="text" name="job_name" id="job_name" placeholder="e.g., Software Engineer">
+        <input type="submit" value="Upload">
+    </form>
 </body>
 </html>
