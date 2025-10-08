@@ -45,11 +45,6 @@
         button:hover {
             background: #0056b3;
         }
-        .options {
-            display: flex;
-            gap: 1rem;
-            align-items: center;
-        }
         .error {
             color: red;
             margin-bottom: 1rem;
@@ -71,55 +66,46 @@
 </head>
 <body>
 
-    <h1>Upload Your CV(s)</h1>
+<h1>Upload Your CV(s)</h1>
 
-    <!-- Show Django form errors here -->
-    {% if form.errors %}
+{% if messages %}
     <div class="error">
         <ul>
-            {% for field in form %}
-                {% for error in field.errors %}
-                    <li>{{ error }}</li>
-                {% endfor %}
-            {% endfor %}
-            {% for error in form.non_field_errors %}
-                <li>{{ error }}</li>
-            {% endfor %}
+        {% for message in messages %}
+            <li>{{ message }}</li>
+        {% endfor %}
         </ul>
     </div>
-    {% endif %}
+{% endif %}
 
-    <form method="POST" enctype="multipart/form-data" action="{% url 'upload' %}">
-        {% csrf_token %}
+<form method="POST" enctype="multipart/form-data" action="{% url 'upload' %}">
+    {% csrf_token %}
 
-        <label for="cv_files">Select CV file(s):</label>
-        <input type="file" name="cv_files" id="cv_files" multiple required accept=".pdf,.doc,.docx,.txt" />
+    <label for="cv_files">Select CV file(s):</label>
+    <input type="file" name="cv_files" id="cv_files" multiple required accept=".pdf,.doc,.docx,.txt" />
 
-        <label for="job_name">Job Name (optional):</label>
-        <input type="text" name="job_name" id="job_name" placeholder="e.g. Software Engineer" />
+    <label for="job_name">Job Name (optional):</label>
+    <input type="text" name="job_name" id="job_name" placeholder="e.g. Software Engineer" />
 
-        <label for="experience">Experience (years):</label>
-        <input type="number" name="experience" id="experience" placeholder="e.g. 3" min="0" />
+    <label for="experience">Experience (years):</label>
+    <input type="number" name="required_experience" id="experience" placeholder="e.g. 3" min="0" />
 
-        <label for="education">Education Level:</label>
-        <select name="education" id="education">
-            <option value="">-- Select --</option>
-            <option value="highschool">High School</option>
-            <option value="bachelor">Bachelor’s Degree</option>
-            <option value="master">Master’s Degree</option>
-            <option value="phd">PhD</option>
-        </select>
+    <label for="education">Education Level:</label>
+    <select name="required_education" id="education">
+        <option value="">-- Select --</option>
+        <option value="highschool">High School</option>
+        <option value="bachelor">Bachelor’s Degree</option>
+        <option value="master">Master’s Degree</option>
+        <option value="phd">PhD</option>
+    </select>
 
-        <label for="skills">Extra Skills:</label>
-        <textarea name="skills" id="skills" rows="3" placeholder="e.g. Python, Django, Machine Learning"></textarea>
+    <label for="skills">Extra Skills (comma separated):</label>
+    <textarea name="required_skills" id="skills" rows="3" placeholder="e.g. Python, Django, Machine Learning"></textarea>
 
-        <div class="options">
-            <button type="submit" name="action" value="match">Match Resumes</button>
-        </div>
-    </form>
+    <button type="submit">Match Resumes</button>
+</form>
 
-    <!-- Back to Home link -->
-    <a href="{% url 'home' %}" class="back-home">⬅ Back to Home</a>
+<a href="{% url 'home' %}" class="back-home">⬅ Back to Home</a>
 
 </body>
 </html>

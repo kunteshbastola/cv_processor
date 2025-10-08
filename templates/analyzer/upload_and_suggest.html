@@ -1,79 +1,71 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>CV Suggestions</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Matched CV Result</title>
     <style>
         body {
             font-family: Arial, sans-serif;
             max-width: 700px;
-            margin: 3rem auto;
-            padding: 2rem;
+            margin: 2rem auto;
+            padding: 1.5rem;
             background: #f9f9f9;
             border-radius: 8px;
             box-shadow: 0 0 10px rgba(0,0,0,0.1);
         }
         h1 {
             text-align: center;
-            color: #333;
             margin-bottom: 1.5rem;
         }
-        .cv-info {
-            margin-bottom: 2rem;
-            padding: 1rem;
+        .cv-card {
+            padding: 1.5rem;
             background: #fff;
             border: 1px solid #ddd;
             border-radius: 6px;
         }
-        .cv-info p {
+        .cv-card p {
             margin: 0.5rem 0;
         }
         .score {
-            font-size: 1.2rem;
             font-weight: bold;
             color: #007bff;
         }
-        .suggestions {
-            padding: 1rem;
-            background: #eef6ff;
-            border-left: 4px solid #007bff;
-            white-space: pre-wrap; /* Keep line breaks */
-        }
-        a.button {
+        .back-home {
             display: inline-block;
             margin-top: 1.5rem;
             padding: 0.6rem 1rem;
-            background-color: #007bff;
+            background: #6c757d;
             color: white;
             text-decoration: none;
-            border-radius: 5px;
-            transition: background-color 0.3s ease;
+            border-radius: 4px;
         }
-        a.button:hover {
-            background-color: #0056b3;
+        .back-home:hover {
+            background: #5a6268;
         }
     </style>
 </head>
 <body>
 
-    <h1>CV Suggestions</h1>
+<h1>Matched CV Result</h1>
 
-    <div class="cv-info">
-        <p><strong>Filename:</strong> {{ cv.filename }}</p>
-        {% if cv.job_name %}
-            <p><strong>Job Applied:</strong> {{ cv.job_name }}</p>
-        {% endif %}
-        <p class="score">Overall Score: {{ cv.overall_score }}</p>
-        <p><strong>Uploaded at:</strong> {{ cv.uploaded_at }}</p>
-    </div>
+{% if best_cv %}
+<div class="cv-card">
+    <p><strong>Filename:</strong> {{ best_cv.filename|default:"N/A" }}</p>
+    <p><strong>Job Name:</strong> {{ best_cv.job_name|default:"N/A" }}</p>
+    <p class="score"><strong>Matching Score:</strong> {{ best_cv.matching_score|default:"0" }}%</p>
+    <p><strong>Overall Score:</strong> {{ best_cv.overall_score|default:"0" }}</p>
+    <p><strong>Experience:</strong> {{ best_cv.experience|default:"N/A" }}</p>
+    <p><strong>Education:</strong> {{ best_cv.education|default:"N/A" }}</p>
+    <p><strong>Skills:</strong> {{ best_cv.skills|default:"N/A" }}</p>
+    <p><strong>Uploaded At:</strong> {{ best_cv.uploaded_at|date:"Y-m-d H:i"|default:"N/A" }}</p>
+</div>
+{% else %}
+<p>No CVs matched your criteria.</p>
+{% endif %}
 
-    <div class="suggestions">
-        <h2>Suggestions</h2>
-        <p>{{ cv.suggestions|linebreaks }}</p>
-    </div>
-
-    <a href="{% url 'upload_and_suggest' %}" class="button">Upload Another CV</a>
+<a href="{% url 'upload_cv' %}" class="back-home">⬅ Back to Upload</a>
+<a href="{% url 'home' %}" class="back-home">🏠 Home</a>
 
 </body>
 </html>
