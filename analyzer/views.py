@@ -134,27 +134,30 @@ def upload(request):
 
 
 @login_required
-@login_required
 def matched_results(request):
     # Get matched CV IDs from session
     matched_ids = request.session.get("matched_cv_ids", [])
     if not isinstance(matched_ids, list):
         matched_ids = []
 
+    # Filter CVs for the current user
     cvs = CVUpload.objects.filter(id__in=matched_ids, user=request.user)
 
     if not cvs.exists():
+        # If no matched CVs, return None safely
         messages.warning(request, "No CVs matched your criteria.")
         return render(request, "analyzer/matched_results.html", {"best_cv": None})
 
-    # Safely pick the CV with the highest matching_score
-    best_cv = None
+    # Pick the best CV safely
     try:
-        best_cv = max(cvs, key=lambda x: x.matching_score if x.matching_score is not None else 0)
+        # Use 0 if matching_score is None
+        best_cv = max(cvs, key=lambda x: x.matching_score or 0)
     except ValueError:
-        best_cv = None  # fallback in case max fails
+        # In case cvs is empty (should not happen), fallback
+        best_cv = None
 
     return render(request, "analyzer/matched_results.html", {"best_cv": best_cv})
+
 
 
 
