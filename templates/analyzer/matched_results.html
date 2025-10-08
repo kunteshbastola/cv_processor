@@ -1,1 +1,71 @@
- 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Best CV Match</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 700px;
+            margin: 2rem auto;
+            padding: 2rem;
+            background: #f9f9f9;
+            border-radius: 6px;
+            box-shadow: 0 0 8px rgba(0,0,0,0.1);
+        }
+        h1 {
+            text-align: center;
+            margin-bottom: 1.5rem;
+        }
+        .cv-card {
+            padding: 1.5rem;
+            background: #fff;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+        }
+        .score {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #007bff;
+        }
+        .info p {
+            margin: 0.5rem 0;
+        }
+        .back-home {
+            display: inline-block;
+            margin-top: 1.5rem;
+            padding: 0.6rem 1rem;
+            background: #6c757d;
+            color: white;
+            text-decoration: none;
+            border-radius: 4px;
+        }
+        .back-home:hover {
+            background: #5a6268;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Best CV Match</h1>
+
+    {% if best_cv %}
+        <div class="cv-card info">
+            <p><strong>Filename:</strong> {{ best_cv.filename|default:"N/A" }}</p>
+            <p><strong>Job Name:</strong> {{ best_cv.job_name|default:"N/A" }}</p>
+            <p class="score"><strong>Matching Score:</strong> {{ best_cv.matching_score|default:"0" }}%</p>
+            <p><strong>Overall Score:</strong> {{ best_cv.overall_score|default:"0" }}</p>
+            <p><strong>Experience:</strong> {{ best_cv.experience|default:"N/A" }}</p>
+            <p><strong>Education:</strong> {{ best_cv.education|default:"N/A" }}</p>
+            <p><strong>Skills:</strong> {{ best_cv.skills|default:"N/A" }}</p>
+            <p><strong>Uploaded At:</strong> {{ best_cv.uploaded_at|date:"Y-m-d H:i" }}</p>
+        </div>
+    {% else %}
+        <p>No CVs matched your criteria.</p>
+    {% endif %}
+
+    <a href="{% url 'home' %}" class="back-home">⬅ Back to Home</a>
+
+</body>
+</html>
