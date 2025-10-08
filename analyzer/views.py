@@ -235,7 +235,7 @@ def upload_and_suggest(request):
             cv_upload.save()
 
             # Pass cv_upload to template
-            return render(request, "analyzer/upload_and_suggest_results.html", {"cv": cv_upload})
+            return render(request, "analyzer/cv_suggestions.html", {"cv": cv_upload})
 
         except Exception as e:
             # Clean up if processing fails

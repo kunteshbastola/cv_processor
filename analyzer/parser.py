@@ -199,33 +199,81 @@ class CVParser:
     # ------------ MATCHING FUNCTION ------------ #
 
     def match_with_criteria(self, parsed_cv: Dict, job_name: str = "",
-                            required_experience: Optional[int] = None,
-                            required_education: str = "",
-                            required_skills: Optional[List[str]] = None) -> Dict:
+                        required_experience: Optional[int] = None,
+                        required_education: str = "",
+                        required_skills: Optional[List[str]] = None) -> Dict:
+        """
+        Matches a parsed CV against job criteria and returns a score and details.
+        """
         score, details = 0, []
 
-        if job_name and job_name.lower() in parsed_cv['raw_text'].lower():
-            score += 20
-            details.append("Job title matched")
+        raw_text = parsed_cv.get('raw_text', '').lower()
+        exp_text = parsed_cv.get('experience', '').lower()
+        edu_text = parsed_cv.get('education', '').lower()
+        skills_text = parsed_cv.get('skills', '').lower()
 
+    # --------- Job Name Matching ---------
+        if job_name:
+            job_words = [w.strip() for w in job_name.lower().split() if w.strip()]
+            if all(word in raw_text for word in job_words):
+                score += 20
+                details.append("Job title matched")
+            else:
+                details.append("Job title not fully matched")
+
+    # --------- Experience Matching ---------
         if required_experience:
-            exp_text = parsed_cv['experience']
-            years = re.findall(r'(\d+)\s*(?:years|yrs|year)', exp_text.lower())
-            years = [int(y) for y in years if y.isdigit()]
+            years = []
+
+        # Match "X years", "X-Y yrs", "X+ yrs"
+            duration_matches = re.findall(r'(\d+)\s*(?:\+)?(?:-|to)?\s*(\d+)?\s*(?:years|yrs|year)', exp_text)
+            for y1, y2 in duration_matches:
+                if y1 and y1.isdigit(): years.append(int(y1))
+                if y2 and y2.isdigit(): years.append(int(y2))
+
+            # Match year ranges like 2020-2023 or 2019 - 2021
+            year_ranges = re.findall(r'\b(19|20)\d{2}\s*[-–]\s*(19|20)\d{2}\b', exp_text)
+            for start, end in year_ranges:
+                start_year = int(start)
+                end_year = int(end)
+                if end_year >= start_year:
+                    years.append(end_year - start_year)  # Difference is experience
+
             max_years = max(years) if years else 0
+
             if max_years >= required_experience:
                 score += 20
                 details.append(f"Experience OK ({max_years} yrs found)")
             else:
                 details.append(f"Experience insufficient ({max_years} yrs found)")
 
-        if required_education and required_education.lower() in parsed_cv['education'].lower():
-            score += 20
-            details.append("Education matched")
+    # --------- Education Matching ---------
+        if required_education:
+            education_map = {
+                "bachelor": ["bachelor", "b.sc", "bsc", "undergraduate"],
+                "master": ["master", "m.sc", "msc", "graduate"],
+                "phd": ["phd", "doctorate", "doctoral"]
+            }
+            req_lower = required_education.lower()
+            matched = False
+            for key, synonyms in education_map.items():
+                if req_lower in synonyms:
+                    if any(s in edu_text for s in synonyms):
+                        matched = True
+                        break
+            if matched:
+                score += 20
+                details.append("Education matched")
+            else:
+                details.append("Education not matched")
 
+    # --------- Skills Matching ---------
         if required_skills:
-            skills_text = parsed_cv['skills'].lower()
-            matched_skills = [s for s in required_skills if s.lower() in skills_text]
+            # Normalize skills: split by comma, semicolon, or new line
+            cv_skills = re.split(r',|;|\n', skills_text)
+            cv_skills = [s.strip() for s in cv_skills if s.strip()]
+
+            matched_skills = [s for s in required_skills if s.lower() in cv_skills]
             score += len(matched_skills) * 10
             if matched_skills:
                 details.append(f"Skills matched: {', '.join(matched_skills)}")
@@ -233,3 +281,4 @@ class CVParser:
                 details.append("No skills matched")
 
         return {"score": score, "details": details}
+
