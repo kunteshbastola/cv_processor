@@ -4,7 +4,7 @@ from . import views
 urlpatterns = [
 
     path('', views.home, name='home'),
-    path('upload/', views.upload_cv, name='upload'),
+    path('upload/', views.upload, name='upload'),
     path('upload_and_suggest/', views.upload_and_suggest, name='upload_and_suggest'),
     path('results/', views.matched_results, name='matched_results'),
     path('suggestions/<int:cv_id>/', views.cv_suggestions, name='cv_suggestions'),

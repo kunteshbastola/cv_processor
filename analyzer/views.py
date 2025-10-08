@@ -27,11 +27,12 @@ from django.contrib.auth.decorators import login_required
 
 
 
-
+def home(request):
+    return render(request, "analyzer/home.html")
 
 
 @login_required
-def upload_cv(request):
+def upload(request):
     if request.method == "POST":
         form = CVUploadForm(request.POST, request.FILES)
         files = request.FILES.getlist("cv_files")
@@ -185,8 +186,7 @@ def upload_cv(request):
 from rest_framework.pagination import PageNumberPagination
 
 
-def home(request):
-    return render(request, "analyzer/home.html")
+
 
 @login_required
 def matched_results(request):
