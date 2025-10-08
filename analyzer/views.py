@@ -89,9 +89,9 @@ def upload(request):
                     if required_experience:
                         total_criteria += 1
                         try:
-                            cv_exp_numbers = [int(s) for s in re.findall(r'\d+', cv_upload.experience)]
-                            cv_exp_years = max(cv_exp_numbers) if cv_exp_numbers else 0
-                            if cv_exp_years >= int(required_experience):
+                            years = [int(s) for s in re.findall(r'\d+', cv_upload.experience)]
+                            max_years = max(years) if years else 0
+                            if max_years >= int(required_experience):
                                 matching_score += 1
                         except:
                             pass
@@ -120,11 +120,12 @@ def upload(request):
 
             if not uploaded_cvs:
                 messages.error(request, "No valid files were processed.")
-                return redirect('upload_cv')
+                return redirect('upload')
 
             # Sort by matching score and store IDs in session
             matched_cvs = sorted(uploaded_cvs, key=lambda x: x.matching_score, reverse=True)
             request.session["matched_cv_ids"] = [cv.id for cv in matched_cvs]
+            request.session["job_title"] = form.cleaned_data.get('job_name', '')
             return redirect("matched_results")
 
     else:
@@ -135,48 +136,24 @@ def upload(request):
 
 @login_required
 def matched_results(request):
-    # Get matched CV IDs from session
-    matched_ids = request.session.get("matched_cv_ids", [])
-    if not isinstance(matched_ids, list):
-        matched_ids = []
+    cv_ids = request.session.get("matched_cv_ids", [])
+    job_title = request.session.get("job_title", "")
 
-    # Filter CVs for the current user
-    cvs = CVUpload.objects.filter(id__in=matched_ids, user=request.user)
+    if not cv_ids:
+        return redirect("upload")
 
-    if not cvs.exists():
-        # If no matched CVs, return None safely
-        messages.warning(request, "No CVs matched your criteria.")
-        return render(request, "analyzer/matched_results.html", {"best_cv": None})
+    matched_cvs = CVUpload.objects.filter(id__in=cv_ids)
+    # Sort according to session order
+    matched_cvs = sorted(matched_cvs, key=lambda x: cv_ids.index(x.id))
 
-    # Pick the best CV safely
-    try:
-        # Use 0 if matching_score is None
-        best_cv = max(cvs, key=lambda x: x.matching_score or 0)
-    except ValueError:
-        # In case cvs is empty (should not happen), fallback
-        best_cv = None
-    if best_cv:
-        # Prepare short snippets
-        best_cv_preview = {
-        "filename": best_cv.filename,
-        "matching_score": best_cv.matching_score,
-        "overall_score": best_cv.overall_score,
-        "skills": best_cv.skills[:200],       # first 200 chars
-        "education": best_cv.education[:200], # first 200 chars
-        "experience": best_cv.experience[:200], # first 200 chars
-        "suggestions": best_cv.suggestions.split('\n')[:5] if best_cv.suggestions else []
-        }
-    else:
-        best_cv_preview = None
-
-
-    return render(request, "analyzer/matched_results.html", {"best_cv": best_cv})
+    return render(request, "analyzer/matched_results.html", {
+        "matched_cvs": matched_cvs,
+        "job_title": job_title
+    })
 
 
 
 
-
-@login_required
 @login_required
 def upload_and_suggest(request):
     if request.method == "POST":
