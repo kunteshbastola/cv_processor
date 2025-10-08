@@ -134,6 +134,7 @@ def upload(request):
 
 
 @login_required
+@login_required
 def matched_results(request):
     # Get matched CV IDs from session
     matched_ids = request.session.get("matched_cv_ids", [])
@@ -146,8 +147,12 @@ def matched_results(request):
         messages.warning(request, "No CVs matched your criteria.")
         return render(request, "analyzer/matched_results.html", {"best_cv": None})
 
-    # Pick the single best CV (highest matching_score)
-    best_cv = max(cvs, key=lambda x: x.matching_score if x.matching_score is not None else 0)
+    # Safely pick the CV with the highest matching_score
+    best_cv = None
+    try:
+        best_cv = max(cvs, key=lambda x: x.matching_score if x.matching_score is not None else 0)
+    except ValueError:
+        best_cv = None  # fallback in case max fails
 
     return render(request, "analyzer/matched_results.html", {"best_cv": best_cv})
 
