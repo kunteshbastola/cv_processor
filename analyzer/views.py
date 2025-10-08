@@ -21,14 +21,12 @@ from rest_framework.permissions import IsAuthenticated
 # Fix your import path as per your folder structure:
 from utiliy.suggestions import generate_resume_suggestions
 from django.contrib.auth.decorators import login_required
-
-
-
-
+import re
 
 
 def home(request):
     return render(request, "analyzer/home.html")
+
 
 
 @login_required
@@ -38,6 +36,7 @@ def upload(request):
         files = request.FILES.getlist("cv_files")
 
         if form.is_valid():
+            # Validate multiple files
             try:
                 form.validate_multiple_files(files)
             except forms.ValidationError as ve:
@@ -45,16 +44,13 @@ def upload(request):
                     messages.error(request, error)
                 return render(request, "analyzer/upload.html", {"form": form})
 
-            # Extract job and matching requirements
-            job_name = form.cleaned_data['job_name']
+            # Extract matching requirements
             required_experience = form.cleaned_data.get('required_experience')
             required_education = form.cleaned_data.get('required_education', '').lower()
             required_skills = [
                 skill.strip().lower() for skill in form.cleaned_data.get('required_skills', '').split(',')
                 if skill.strip()
             ]
-
-            action = request.POST.get("action")  # e.g., "suggestions", "top5", "match"
 
             # Clear old uploads
             CVUpload.objects.filter(user=request.user).delete()
@@ -73,35 +69,24 @@ def upload(request):
                 cv_upload.save()
 
                 try:
-                    file_path = cv_upload.file.path
-                    parsed_data = parser.parse_cv(file_path, file_ext)
+                    parsed_data = parser.parse_cv(cv_upload.file.path, file_ext)
                     scoring_results = scorer.score_cv(parsed_data)
 
                     # Save parsed fields
                     cv_upload.raw_text = parsed_data.get("raw_text", "")
-                    cv_upload.contact_info = parsed_data.get("contact_info", "")
                     cv_upload.experience = parsed_data.get("experience", "")
                     cv_upload.education = parsed_data.get("education", "")
                     cv_upload.skills = parsed_data.get("skills", "")
 
                     # Save scores
-                    scores = scoring_results.get("scores", {})
                     cv_upload.overall_score = scoring_results.get("overall_score", 0)
+                    scores = scoring_results.get("scores", {})
                     cv_upload.contact_score = scores.get("contact", 0)
                     cv_upload.experience_score = scores.get("experience", 0)
                     cv_upload.education_score = scores.get("education", 0)
                     cv_upload.skills_score = scores.get("skills", 0)
                     cv_upload.format_score = scores.get("format", 0)
 
-                    # Generate suggestions
-                    resume_text = parsed_data.get("raw_text", "")
-                    job_suggestions = generate_resume_suggestions(resume_text, job_name)
-                    existing_suggestions = scoring_results.get("suggestions", "")
-                    combined_suggestions = f"{existing_suggestions}\n{job_suggestions}".strip()
-                    cv_upload.suggestions = combined_suggestions
-
-                    # Add job name
-                    cv_upload.job_name = job_name
                     cv_upload.processed = True
 
                     # ===============================
@@ -110,32 +95,32 @@ def upload(request):
                     matching_score = 0
                     total_criteria = 0
 
-                    # Experience (you can enhance with NLP later)
+                    # 1. Experience
                     if required_experience:
                         total_criteria += 1
-                        if str(required_experience) in cv_upload.experience:
-                            matching_score += 1
+                        try:
+                            cv_exp_numbers = [int(s) for s in re.findall(r'\d+', cv_upload.experience)]
+                            cv_exp_years = max(cv_exp_numbers) if cv_exp_numbers else 0
+                            if cv_exp_years >= int(required_experience):
+                                matching_score += 1
+                        except:
+                            pass
 
-                    # Education
+                    # 2. Education
                     if required_education:
                         total_criteria += 1
                         if required_education in cv_upload.education.lower():
                             matching_score += 1
 
-                    # Skills
+                    # 3. Skills
                     if required_skills:
                         total_criteria += 1
-                        cv_skills = [s.strip().lower() for s in cv_upload.skills.split(',')]
-                        matched_skills = len(set(required_skills) & set(cv_skills))
-                        if matched_skills >= len(required_skills) * 0.6:  # 60% match
+                        cv_skills = [s.strip().lower() for s in re.split(r',|;', cv_upload.skills)]
+                        if len(set(required_skills) & set(cv_skills)) > 0:
                             matching_score += 1
 
-                    # Final matching score as percentage
-                    if total_criteria > 0:
-                        cv_upload.matching_score = round((matching_score / total_criteria) * 100, 2)
-                    else:
-                        cv_upload.matching_score = None
-
+                    # Final matching score
+                    cv_upload.matching_score = round((matching_score / total_criteria) * 100, 2) if total_criteria else 0
                     cv_upload.save()
                     uploaded_cvs.append(cv_upload)
 
@@ -147,30 +132,16 @@ def upload(request):
                 messages.error(request, "No valid files were processed.")
                 return redirect('upload_cv')
 
-            # Process according to action
-            if action == "suggestions":
-                request.session["uploaded_cv_ids"] = [cv.id for cv in uploaded_cvs]
-                return redirect("results")
-
-            elif action == "top5":
-                top_cvs = sorted(uploaded_cvs, key=lambda x: x.overall_score or 0, reverse=True)[:5]
-                request.session["top_cv_ids"] = [cv.id for cv in top_cvs]
-                messages.success(request, f"Processed {len(uploaded_cvs)} CV(s). Showing top 5 results.")
-                return redirect("cv_rank")
-
-            elif action == "match":
-                matched_cvs = sorted(
-                    [cv for cv in uploaded_cvs if cv.matching_score is not None],
-                    key=lambda x: x.matching_score,
-                    reverse=True
-                )
-                request.session["matched_cv_ids"] = [cv.id for cv in matched_cvs]
-                return redirect("matched_results")
+            # Sort by matching score and redirect to matched results
+            matched_cvs = sorted(uploaded_cvs, key=lambda x: x.matching_score, reverse=True)
+            request.session["matched_cv_ids"] = [cv.id for cv in matched_cvs]
+            return redirect("matched_results")
 
     else:
         form = CVUploadForm()
 
     return render(request, "analyzer/upload.html", {"form": form})
+
 
 
 
@@ -190,27 +161,14 @@ from rest_framework.pagination import PageNumberPagination
 
 @login_required
 def matched_results(request):
+ def matched_results(request):
+    # Get matched CV IDs from session
     matched_ids = request.session.get("matched_cv_ids", [])
-    cvs = CVUpload.objects.filter(id__in=matched_ids)
-    action = request.POST.get("action")
-    uploaded_cvs = CVUpload.objects.filter(user=request.user, processed=True)
+    cvs = CVUpload.objects.filter(id__in=matched_ids, user=request.user)
+
     if not cvs.exists():
         messages.warning(request, "No CVs matched your criteria.")
         return render(request, "analyzer/matched_results.html", {"best_cv": None})
-    
-    elif action == "match":
-        matched_cvs = sorted(
-        [cv for cv in uploaded_cvs if cv.matching_score is not None],
-        key=lambda x: x.matching_score,
-        reverse=True
-    )
-
-    if not matched_cvs:  
-        # fallback: take best overall scored CV
-        matched_cvs = sorted(uploaded_cvs, key=lambda x: x.overall_score or 0, reverse=True)[:1]
-
-    request.session["matched_cv_ids"] = [cv.id for cv in matched_cvs]
-    return redirect("matched_results")
 
     # Pick the single best CV (highest matching_score)
     best_cv = max(cvs, key=lambda x: x.matching_score or 0)
@@ -218,11 +176,6 @@ def matched_results(request):
     return render(request, "analyzer/matched_results.html", {"best_cv": best_cv})
 
 
-
-
-from django.contrib.auth.decorators import login_required
-from django.shortcuts import render
-from django.contrib import messages
 
 @login_required
 def upload_and_suggest(request):
@@ -292,10 +245,6 @@ def upload_and_suggest(request):
 
 
  # This view displays the details of a specific CV including its scores and suggestions.
-
-
-from django.contrib.auth.decorators import login_required
-from django.shortcuts import render, get_object_or_404
 
 @login_required
 def cv_suggestions(request, cv_id):
