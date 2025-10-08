@@ -53,12 +53,14 @@
     {% if best_cv %}
         <div class="cv-card info">
             <p><strong>Filename:</strong> {{ best_cv.filename|default:"N/A" }}</p>
-            <p><strong>Job Name:</strong> {{ best_cv.job_name|default:"N/A" }}</p>
+     
             <p class="score"><strong>Matching Score:</strong> {{ best_cv.matching_score|default:"0" }}%</p>
             <p><strong>Overall Score:</strong> {{ best_cv.overall_score|default:"0" }}</p>
-            <p><strong>Experience:</strong> {{ best_cv.experience|default:"N/A" }}</p>
-            <p><strong>Education:</strong> {{ best_cv.education|default:"N/A" }}</p>
-            <p><strong>Skills:</strong> {{ best_cv.skills|default:"N/A" }}</p>
+            <p><strong>Skills:</strong> {{ best_cv.skills|default_if_none:"N/A" }}</p>
+            <p><strong>Education:</strong> {{ best_cv.education|default_if_none:"N/A" }}</p>
+            <p><strong>Experience:</strong> {{ best_cv.experience|default_if_none:"N/A" }}</p>
+            <p><strong>Job Name:</strong> {{ best_cv.job_name|default_if_none:"N/A" }}</p>
+
             <p><strong>Uploaded At:</strong> {{ best_cv.uploaded_at|date:"Y-m-d H:i" }}</p>
         </div>
     {% else %}
