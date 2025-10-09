@@ -144,10 +144,29 @@ def upload(request):
 
 @login_required
 def matched_results(request):
+    """
+    Display CVs sorted by matching score.
+    Safely handles empty session, missing fields, and processed=False CVs.
+    """
     matched_ids = request.session.get("matched_cv_ids", [])
-    cvs = CVUpload.objects.filter(id__in=matched_ids).order_by('-matching_score')
+
+    # If no matched CVs in session, show message
+    if not matched_ids:
+        return render(request, "analyzer/matched_results.html", {
+            "cvs": [],
+            "job_title": request.session.get("job_title", ""),
+            "error_message": "No CVs have been uploaded or matched yet."
+        })
+
+    # Fetch only processed CVs
+    cvs = CVUpload.objects.filter(id__in=matched_ids, processed=True).order_by('-matching_score')
     job_title = request.session.get("job_title", "")
-    return render(request, "analyzer/matched_results.html", {"cvs": cvs, "job_title": job_title})
+
+    return render(request, "analyzer/matched_results.html", {
+        "cvs": cvs,
+        "job_title": job_title,
+        "error_message": None
+    })
 
 
 

@@ -2,12 +2,27 @@ import re
 from collections import Counter
 from utiliy.keyword import KEYWORDS
 
+
+
 def clean_text(text):
+    """
+    Lowercase text and remove all non-alphabetic characters (keep spaces).
+    """
     return re.sub(r'[^a-zA-Z ]', '', text.lower())
 
+def normalize_job_name(name):
+    """Lowercase, remove non-alphanumeric characters."""
+    return re.sub(r'[^a-z0-9]', '', name.lower())
+
 def generate_resume_suggestions(cv_text, job_name):
-    job = job_name.lower()
-    expected_keywords = KEYWORDS.get(job, [])
+    normalized_job = normalize_job_name(job_name)
+    
+    # Match against normalized keys in KEYWORDS
+    expected_keywords = []
+    for k, v in KEYWORDS.items():
+        if normalize_job_name(k) == normalized_job:
+            expected_keywords = v
+            break
 
     if not expected_keywords:
         return "No specific suggestions available for this job role."
@@ -28,3 +43,5 @@ def generate_resume_suggestions(cv_text, job_name):
         suggestions.append("Your resume contains most essential keywords!")
 
     return "\n".join(suggestions)
+
+
