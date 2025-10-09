@@ -112,7 +112,7 @@ WSGI_APPLICATION = 'cv_processor.wsgi.application'
 
 
 # Set debug to False in production
-DEBUG = os.environ.get('DEBUG', 'False') == 'True'
+DEBUG = 'True'
 
 
 
