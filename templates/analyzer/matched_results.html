@@ -18,7 +18,6 @@
         <!-- Toggle detailed info -->
         <button type="button" onclick="toggleDetails('details-{{ cv.id }}')">View More</button>
         <div id="details-{{ cv.id }}" style="display:none; margin-top:10px;">
-          <p><strong>Contact Info:</strong> {{ cv.contact_info }}</p>
           <p><strong>Experience:</strong><br>{{ cv.experience|linebreaks }}</p>
           <p><strong>Education:</strong><br>{{ cv.education|linebreaks }}</p>
           <p><strong>Skills:</strong><br>{{ cv.skills|linebreaks }}</p>

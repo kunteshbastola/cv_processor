@@ -200,11 +200,15 @@ def upload_and_suggest(request):
             cv_upload.format_score = scores.get('format', 0) or 0
 
             # Generate suggestions safely
+       # Generate suggestions safely
             resume_text = parsed_data.get('raw_text', '') or ''
-            job_suggestions = generate_resume_suggestions(resume_text, job_name) or ''
+            job_suggestions_list = generate_resume_suggestions(resume_text, job_name) or []
+            job_suggestions = "\n".join(job_suggestions_list)
+
             existing_suggestions = scoring_results.get('suggestions', '') or ''
             combined_suggestions = f"{existing_suggestions}\n{job_suggestions}".strip()
-            cv_upload.suggestions = combined_suggestions[:1000]  # ✅ Limit to 1000 chars
+
+            cv_upload.suggestions = combined_suggestions[:1000]
 
             cv_upload.processed = True
             cv_upload.save()
