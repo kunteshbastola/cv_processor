@@ -1,112 +1,35 @@
+{% load static %}
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CV Analysis Result</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            max-width: 700px;
-            margin: 2rem auto;
-            padding: 1rem;
-            background: #f9f9f9;
-            border-radius: 6px;
-        }
-        h1 {
-            text-align: center;
-            margin-bottom: 1.5rem;
-        }
-        .section {
-            margin-bottom: 1.5rem;
-            background: white;
-            padding: 1rem;
-            border-radius: 4px;
-            box-shadow: 0 0 5px #ccc;
-        }
-        .section h2 {
-            margin-top: 0;
-            border-bottom: 1px solid #ddd;
-            padding-bottom: 0.3rem;
-            color: #007bff;
-        }
-        pre {
-            white-space: pre-wrap;
-            word-wrap: break-word;
-            background: #f5f5f5;
-            padding: 1rem;
-            border-radius: 4px;
-            max-height: 300px;
-            overflow-y: auto;
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 0.5rem;
-        }
-        th, td {
-            padding: 0.5rem 0.75rem;
-            text-align: left;
-            border-bottom: 1px solid #eee;
-        }
-        th {
-            background: #007bff;
-            color: white;
-        }
-        a.back-link {
-            display: inline-block;
-            margin-top: 1rem;
-            color: #007bff;
-            text-decoration: none;
-        }
-        a.back-link:hover {
-            text-decoration: underline;
-        }
-    </style>
+    <title>CV Suggestions</title>
+    <link rel="stylesheet" href="{% static 'analyzer/style.css' %}">
 </head>
 <body>
 
-    <h1>CV Analysis Result</h1>
+<div class="container">
+    <h2>CV Analysis</h2>
 
-    <div class="section">
-        <h2>File Information</h2>
-        <p><strong>Filename:</strong> {{ cv.filename|default:"N/A" }}</p>
-        <p><strong>Job Name:</strong> {{ cv.job_name|default:"N/A" }}</p>
-        <p><strong>Uploaded At:</strong> {{ cv.uploaded_at|date:"Y-m-d H:i"|default:"N/A" }}</p>
+    <div class="card">
+        <p><strong>Filename:</strong> {{ cv.filename }}</p>
+        <p><strong>Overall Score:</strong> {{ cv.overall_score }}</p>
+        <p><strong>Matching Score:</strong> {{ cv.matching_score }}%</p>
     </div>
 
-    <div class="section">
-        <h2>Scores</h2>
-        <table>
-            <tbody>
-                <tr><th>Overall Score</th><td>{{ cv.overall_score|default:"0" }}</td></tr>
-                <tr><th>Contact Info Score</th><td>{{ cv.contact_score|default:"0" }}</td></tr>
-                <tr><th>Experience Score</th><td>{{ cv.experience_score|default:"0" }}</td></tr>
-                <tr><th>Education Score</th><td>{{ cv.education_score|default:"0" }}</td></tr>
-                <tr><th>Skills Score</th><td>{{ cv.skills_score|default:"0" }}</td></tr>
-                <tr><th>Format Score</th><td>{{ cv.format_score|default:"0" }}</td></tr>
-            </tbody>
-        </table>
-    </div>
+    <h3>Score Breakdown</h3>
+    <ul>
+        <li>Contact: {{ cv.contact_score }}</li>
+        <li>Experience: {{ cv.experience_score }}</li>
+        <li>Education: {{ cv.education_score }}</li>
+        <li>Skills: {{ cv.skills_score }}</li>
+        <li>Format: {{ cv.format_score }}</li>
+    </ul>
 
-    <div class="section">
-    <h2>Suggestions</h2>
-    {% if cv.suggestions %}
-        <ul>
-            {% for line in cv.suggestions.splitlines %}
-                {% if line.strip %}
-                    <li>{{ line }}</li>
-                {% endif %}
-            {% endfor %}
-        </ul>
-    {% else %}
-        <p>No suggestions available.</p>
-    {% endif %}
-    </div>
+    <h3>Suggestions</h3>
+    <pre class="suggestions">{{ suggestions }}</pre>
 
-
-    <a class="back-link" href="{% url 'upload_and_suggest' %}">&larr; Upload Another CV</a>
-    <a class="back-link" href="{% url 'home' %}">🏠 Home</a>
+    <a href="{% url 'matched_results' %}" class="btn secondary">Back to Results</a>
+</div>
 
 </body>
 </html>

@@ -1,51 +1,47 @@
-{% extends "home.html" %}
-{% block content %}
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Matched CV Results</title>
+    <link rel="stylesheet" href="{% static 'analyzer/style.css' %}">
+</head>
+<body>
 
-<h2>Matched CVs for "{{ job_title|default:'N/A' }}"</h2>
+<div class="container">
+    <h2>Matched CVs for "{{ job_title }}"</h2>
 
-{% if error_message %}
-  <p style="color:red;">{{ error_message }}</p>
-{% endif %}
+    {% if error_message %}
+        <p class="alert">{{ error_message }}</p>
+    {% endif %}
 
-{% if cvs %}
-  <div class="cv-list">
-    {% for cv in cvs %}
-      <div class="cv-card" style="border:1px solid #ccc; padding:15px; margin-bottom:20px;">
-        <h3>{{ cv.filename|default:"N/A" }}</h3>
-        <p><strong>Overall Score:</strong> {{ cv.overall_score|default:"0" }}%</p>
-        <p><strong>Matching Score:</strong> {{ cv.matching_score|default:"0" }}%</p>
+    {% if cvs %}
+        <table>
+            <tr>
+                <th>Filename</th>
+                <th>Overall Score</th>
+                <th>Matching Score</th>
+                <th>Action</th>
+            </tr>
 
-        {% if cv.skills %}
-          <p><strong>Skills:</strong> {{ cv.skills|truncatechars:50|default:"N/A" }}</p>
-        {% endif %}
+            {% for cv in cvs %}
+            <tr>
+                <td>{{ cv.filename }}</td>
+                <td>{{ cv.overall_score }}</td>
+                <td>{{ cv.matching_score }}%</td>
+                <td>
+                    <a href="{% url 'cv_suggestions' cv.id %}" class="btn small">
+                        View Details
+                    </a>
+                </td>
+            </tr>
+            {% endfor %}
+        </table>
+    {% else %}
+        <p>No CVs matched.</p>
+    {% endif %}
 
-        <button type="button" onclick="toggleDetails('details-{{ cv.id }}')">View More</button>
-        <div id="details-{{ cv.id }}" style="display:none; margin-top:10px;">
-          <p><strong>Experience:</strong><br>{{ cv.experience|linebreaks|default:"N/A" }}</p>
-          <p><strong>Education:</strong><br>{{ cv.education|linebreaks|default:"N/A" }}</p>
-          <p><strong>Skills:</strong><br>{{ cv.skills|linebreaks|default:"N/A" }}</p>
+    <a href="{% url 'upload' %}" class="btn secondary">Upload Again</a>
+</div>
 
-          <h4>Section Scores:</h4>
-          <ul>
-            <li>Contact: {{ cv.contact_score|default:"0" }}%</li>
-            <li>Experience: {{ cv.experience_score|default:"0" }}%</li>
-            <li>Education: {{ cv.education_score|default:"0" }}%</li>
-            <li>Skills: {{ cv.skills_score|default:"0" }}%</li>
-            <li>Format: {{ cv.format_score|default:"0" }}%</li>
-          </ul>
-        </div>
-      </div>
-    {% endfor %}
-  </div>
-{% else %}
-  <p>No CVs matched yet.</p>
-{% endif %}
-
-<script>
-function toggleDetails(id) {
-    var elem = document.getElementById(id);
-    elem.style.display = (elem.style.display === "none") ? "block" : "none";
-}
-</script>
-
-{% endblock %}
+</body>
+</html>
