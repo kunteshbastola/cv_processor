@@ -208,7 +208,10 @@ def upload_and_suggest(request):
         except Exception as e:
             messages.error(request, f"Error processing CV: {e}")
 
-    return render(request, "analyzer/upload_and_suggest.html", {"suggestions": suggestions})
+    return render(request, "analyzer/upload_and_suggest.html", {
+        "cv": cv_upload,
+        "suggestions": suggestions
+    })
 
 
 
