@@ -166,13 +166,18 @@ def matched_results(request):
 
 
 @login_required
+@login_required
 def upload_and_suggest(request):
     if request.method == "POST":
         file = request.FILES.get("file")
-        job_name = request.POST.get("job_name", "")
+        job_name = request.POST.get("job_name", "").strip()  # Added .strip()
 
         if not file:
             messages.error(request, "No CV file uploaded.")
+            return render(request, "analyzer/upload_and_suggest.html")
+
+        if not job_name:
+            messages.error(request, "Please specify a job title for targeted suggestions.")
             return render(request, "analyzer/upload_and_suggest.html")
 
         file_ext = os.path.splitext(file.name)[1].lower()
@@ -212,21 +217,106 @@ def upload_and_suggest(request):
             cv_upload.skills_score = scores.get('skills', 0) or 0
             cv_upload.format_score = scores.get('format', 0) or 0
 
-            # Generate suggestions
+            # ============================================
+            # GENERATE SUGGESTIONS - CORRECTED VERSION
+            # ============================================
             resume_text = parsed_data.get('raw_text', '') or ''
+            
+            # Get AI suggestions for the specific job
             job_suggestions = generate_resume_suggestions(resume_text, job_name)
-            existing_suggestions = "\n".join(scoring_results.get('suggestions', [])) if isinstance(scoring_results.get('suggestions', []), list) else str(scoring_results.get('suggestions', ''))
-            combined_suggestions = f"{existing_suggestions}\n{job_suggestions}".strip()
-            cv_upload.suggestions = combined_suggestions[:1000]  # limit length
+            
+            # Get default suggestions from scorer
+            default_suggestions_list = scoring_results.get('suggestions', [])
+            if isinstance(default_suggestions_list, list):
+                default_suggestions = "\n".join(default_suggestions_list)
+            else:
+                default_suggestions = str(default_suggestions_list or "")
+            
+            # Debug logging (optional - remove in production)
+            import logging
+            logger = logging.getLogger(__name__)
+            logger.info(f"Job name: {job_name}")
+            logger.info(f"AI suggestions length: {len(job_suggestions or '')}")
+            logger.info(f"Default suggestions: {default_suggestions}")
+            
+            # COMBINE SUGGESTIONS INTELLIGENTLY
+            final_suggestions = ""
+            
+            # Check if AI suggestions are meaningful and job-specific
+            is_ai_suggestions_valid = (
+                job_suggestions and 
+                len(job_suggestions.strip()) > 50 and
+                not job_suggestions.startswith("Add a professional email address") and
+                not job_suggestions.startswith("Error")
+            )
+            
+            if is_ai_suggestions_valid:
+                # AI suggestions look good - use them as primary
+                final_suggestions = job_suggestions
+                
+                # Add default suggestions only if they're not redundant
+                if default_suggestions:
+                    ai_lines = [line.strip().lower() for line in job_suggestions.split('\n') if line.strip()]
+                    default_lines = [line.strip() for line in default_suggestions.split('\n') if line.strip()]
+                    
+                    unique_defaults = []
+                    for default_line in default_lines:
+                        default_lower = default_line.lower()
+                        # Check if similar suggestion already exists in AI suggestions
+                        is_duplicate = any(default_lower in ai_line or ai_line in default_lower 
+                                          for ai_line in ai_lines)
+                        if not is_duplicate:
+                            unique_defaults.append(default_line)
+                    
+                    if unique_defaults:
+                        final_suggestions += "\n\nAdditional improvements:\n• " + "\n• ".join(unique_defaults)
+            else:
+                # AI suggestions failed or are too generic
+                # Try to enhance default suggestions with job-specific context
+                if default_suggestions:
+                    final_suggestions = f"For the {job_name} role:\n\n"
+                    final_suggestions += "• " + default_suggestions.replace("\n", "\n• ")
+                    
+                    # Add some job-specific enhancements
+                    if 'software' in job_name.lower() or 'developer' in job_name.lower():
+                        final_suggestions += "\n\nFor software roles, also consider:\n"
+                        final_suggestions += "• Add specific programming languages and frameworks\n"
+                        final_suggestions += "• Include GitHub profile with project examples\n"
+                        final_suggestions += "• Mention development methodologies (Agile, Scrum, etc.)"
+                    elif 'data' in job_name.lower():
+                        final_suggestions += "\n\nFor data roles, also consider:\n"
+                        final_suggestions += "• Highlight specific ML algorithms and tools\n"
+                        final_suggestions += "• Include data visualization experience\n"
+                        final_suggestions += "• Mention databases and query languages used"
+                else:
+                    # Fallback suggestions
+                    final_suggestions = f"""Based on your resume for the {job_name} role:
 
+1. Tailor your experience to highlight relevant {job_name} skills
+2. Include specific technologies and tools mentioned in {job_name} job descriptions
+3. Add quantifiable achievements with numbers and metrics
+4. Ensure your skills section matches common {job_name} requirements
+5. Consider adding a summary/objective targeting {job_name} positions"""
+            
+            cv_upload.suggestions = final_suggestions[:1500]  # Increased limit
+            
+            # Mark as processed
             cv_upload.processed = True
             cv_upload.save()
-
+            
+            # Debug: Check what's being saved
+            logger.info(f"Final suggestions saved: {cv_upload.suggestions[:200]}...")
+            
             return render(request, "analyzer/cv_suggestions.html", {"cv": cv_upload})
 
         except Exception as e:
-            cv_upload.file.delete(save=False)
-            cv_upload.delete()
+            # Clean up on error
+            if cv_upload.pk:
+                if cv_upload.file and default_storage.exists(cv_upload.file.name):
+                    default_storage.delete(cv_upload.file.name)
+                cv_upload.delete()
+            
+            logger.error(f"Error processing CV: {str(e)}", exc_info=True)
             messages.error(request, f"Error processing file: {str(e)}")
             return render(request, "analyzer/upload_and_suggest.html")
 
@@ -236,13 +326,33 @@ def upload_and_suggest(request):
 @login_required
 def cv_suggestions(request, cv_id):
     cv = get_object_or_404(CVUpload, id=cv_id, user=request.user, processed=True)
-    safe_suggestions = (cv.suggestions or "").strip()
-    if len(safe_suggestions) > 1000:
-        safe_suggestions = safe_suggestions[:1000] + "..."
+    
+    # Format suggestions for display
+    suggestions = (cv.suggestions or "").strip()
+    
+    # If suggestions are still generic, enhance them
+    if suggestions and len(suggestions) < 100 and cv.target_job_role:
+        # Suggestions seem too short/generic
+        job_role = cv.target_job_role or "this role"
+        enhanced = f"""For the {job_role} position, consider these improvements:
 
+1. Review job descriptions for {job_role} to identify key keywords
+2. Tailor your skills section to match {job_role} requirements
+3. Add specific examples of projects relevant to {job_role}
+4. Include quantifiable achievements with numbers
+5. Ensure your contact info is professional and complete
+
+{suggestions}"""
+        suggestions = enhanced
+    
+    # Ensure suggestions are properly formatted
+    if suggestions:
+        # Convert bullet points if needed
+        suggestions = suggestions.replace("• ", "\n• ").replace("1.", "\n1.").replace("2.", "\n2.")
+    
     return render(request, "analyzer/cv_suggestions.html", {
         "cv": cv,
-        "suggestions": safe_suggestions,
+        "suggestions": suggestions[:2000],  # Increased limit for display
     })
 
 
