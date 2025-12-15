@@ -112,7 +112,8 @@ WSGI_APPLICATION = 'cv_processor.wsgi.application'
 
 
 # Set debug to False in production
-DEBUG = os.getenv('DEBUG', 'True') == 'True'
+# DEBUG = os.getenv('DEBUG', 'True') == 'True'
+DEBUG = True
 
 
 
@@ -201,6 +202,22 @@ USE_TZ = True
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
+
+
+# Add to settings.py
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+        },
+    },
+    'root': {
+        'handlers': ['console'],
+        'level': 'DEBUG',
+    },
+}
 
 
 ALLOWED_HOSTS = [
