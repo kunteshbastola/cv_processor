@@ -1,3 +1,9 @@
+{% extends 'analyzer/base.html' %}
+{% load static %}
+
+{% block title %}Home - CV Analyzer{% endblock %}
+
+{% block content %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -424,14 +430,14 @@
 
 <!-- Navigation -->
 <nav class="nav container">
-  <a href="#" class="logo" onclick="showPage('page-home'); return false;">
+  <a href="/" class="logo">
     <i class="fas fa-file-alt"></i> CV Analyzer
   </a>
   <div class="nav-links">
-    <a href="#" class="nav-link" onclick="showPage('page-home'); return false;">Home</a>
-    <a href="#" class="nav-link" onclick="showPage('page-upload-match'); return false;">CV Matching</a>
-    <a href="#" class="nav-link" onclick="showPage('page-upload-suggest'); return false;">CV Suggestions</a>
-    <a href="#" class="btn btn-secondary">Sign In</a>
+    <a href="/" class="nav-link">Home</a>
+    <a href="{% url 'upload' %}" class="nav-link">CV Matching</a>
+    <a href="{% url 'upload_and_suggest' %}" class="nav-link">CV Suggestions</a>
+    <!-- Removed Sign In button -->
   </div>
 </nav>
 
@@ -441,10 +447,10 @@
     <h1 class="hero-title">AI-Powered CV Ranking System</h1>
     <p class="hero-subtitle">Automatically evaluate and rank resumes based on job descriptions using advanced AI and NLP technology.</p>
     <div class="hero-buttons">
-      <a href="#" class="btn btn-primary" onclick="showPage('page-upload-match'); return false;">
+      <a href="{% url 'upload' %}" class="btn btn-primary">
         <i class="fas fa-upload"></i> Try as Recruiter
       </a>
-      <a href="#" class="btn btn-success" onclick="showPage('page-upload-suggest'); return false;">
+      <a href="{% url 'upload_and_suggest' %}" class="btn btn-success">
         <i class="fas fa-user-check"></i> Try as Job Seeker
       </a>
     </div>
@@ -478,13 +484,13 @@
         <div class="audience-icon">👥</div>
         <h3 class="audience-title">Recruiters</h3>
         <p class="audience-desc">Want to shortlist CVs faster and smarter? Streamline your recruitment process with AI-powered ranking and insights.</p>
-        <a href="#" class="btn btn-primary" onclick="showPage('page-upload-match'); return false;">Try as Recruiter</a>
+        <a href="{% url 'upload' %}" class="btn btn-primary">Try as Recruiter</a>
       </div>
       <div class="card audience-card">
         <div class="audience-icon">👤</div>
         <h3 class="audience-title">Job Seekers</h3>
         <p class="audience-desc">Want to improve your chances of getting hired? Optimize your CV for specific job descriptions with personalized suggestions.</p>
-        <a href="#" class="btn btn-success" onclick="showPage('page-upload-suggest'); return false;">Try as Job Seeker</a>
+        <a href="{% url 'upload_and_suggest' %}" class="btn btn-success">Try as Job Seeker</a>
       </div>
     </div>
   </div>
@@ -594,8 +600,8 @@
     <div class="footer-links">
       <div>
         <div class="footer-title">Product</div>
-        <a href="#" class="footer-link" onclick="showPage('page-upload-match'); return false;">CV Matching</a>
-        <a href="#" class="footer-link" onclick="showPage('page-upload-suggest'); return false;">CV Suggestions</a>
+        <a href="{% url 'upload' %}" class="footer-link">CV Matching</a>
+        <a href="{% url 'upload_and_suggest' %}" class="footer-link">CV Suggestions</a>
         <a href="#" class="footer-link">Features</a>
         <a href="#" class="footer-link">Pricing</a>
       </div>
@@ -627,100 +633,7 @@
   </div>
 </footer>
 
-<!-- YOUR EXISTING FUNCTIONAL PAGES (Hidden by default) -->
-<div class="container" style="min-height: 60vh;">
-
-  <!-- Upload & Match Page -->
-  <div id="page-upload-match" class="hidden">
-    <div class="back-link" onclick="showPage('page-home')">
-      <i class="fas fa-arrow-left"></i> Back to Home
-    </div>
-    <div class="card">
-      <h2>Upload CVs for Matching</h2>
-      <form id="form-upload-match">
-        <div>
-          <label>Select CV Files (PDF, DOC, DOCX, TXT)</label>
-          <input type="file" id="files-match" multiple required>
-        </div>
-        <div>
-          <label>Job Title</label>
-          <input type="text" id="job-match" placeholder="Software Engineer" required>
-        </div>
-        <div>
-          <label>Minimum Years of Experience</label>
-          <input type="number" id="exp-match" min="0">
-        </div>
-        <div>
-          <label>Education Level</label>
-          <select id="edu-match">
-            <option value="">-- Select --</option>
-            <option value="highschool">High School</option>
-            <option value="bachelor">Bachelor's</option>
-            <option value="master">Master's</option>
-            <option value="phd">PhD</option>
-          </select>
-        </div>
-        <div>
-          <label>Required Skills (comma-separated)</label>
-          <textarea id="skills-match" rows="2"></textarea>
-        </div>
-        <button type="submit" class="btn btn-primary">
-          <i class="fas fa-play"></i> Analyze & Match CVs
-        </button>
-      </form>
-    </div>
-  </div>
-
-  <!-- Results Page -->
-  <div id="page-results" class="hidden">
-    <div class="back-link" onclick="showPage('page-home')">
-      <i class="fas fa-arrow-left"></i> Back to Home
-    </div>
-    <div id="results-container"></div>
-  </div>
-
-  <!-- Upload & Suggest Page -->
-  <div id="page-upload-suggest" class="hidden">
-    <div class="back-link" onclick="showPage('page-home')">
-      <i class="fas fa-arrow-left"></i> Back to Home
-    </div>
-    <div class="card">
-      <h2>Upload CV for Analysis</h2>
-      <form id="form-upload-suggest">
-        <div>
-          <label>Select CV File (PDF, DOC, DOCX, TXT)</label>
-          <input type="file" id="file-suggest" required>
-        </div>
-        <div>
-          <label>Job Title (Optional)</label>
-          <input type="text" id="job-suggest" placeholder="Software Engineer">
-        </div>
-        <button type="submit" class="btn btn-success">
-          <i class="fas fa-magic"></i> Analyze CV
-        </button>
-      </form>
-    </div>
-  </div>
-
-  <!-- CV Suggestions Page -->
-  <div id="page-suggestions" class="hidden">
-    <div class="back-link" onclick="showPage('page-upload-suggest')">
-      <i class="fas fa-arrow-left"></i> Back
-    </div>
-    <div id="suggestion-result" class="card"></div>
-  </div>
-
-</div>
-
 <script>
-  // Keep your existing page navigation
-  function showPage(id){
-    document.querySelectorAll('[id^="page-"]').forEach(p => p.classList.add('hidden'));
-    document.getElementById(id).classList.remove('hidden');
-    // Scroll to top when showing a new page
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  }
-
   // FAQ toggle function
   function toggleFAQ(element) {
     const answer = element.nextElementSibling;
@@ -734,91 +647,8 @@
       icon.style.transform = 'rotate(180deg)';
     }
   }
-
-  // Mock Results for Upload & Match
-  document.getElementById('form-upload-match').addEventListener('submit', function(e){
-    e.preventDefault();
-    const files = document.getElementById('files-match').files;
-    if(!files.length) return alert('Select files!');
-    const resultsContainer = document.getElementById('results-container');
-    resultsContainer.innerHTML = '';
-    
-    // Sort files by "matching score" for ranking
-    const fileArray = Array.from(files);
-    fileArray.forEach((file, idx) => {
-      const overall = Math.floor(Math.random()*30)+70;
-      const matching = Math.floor(Math.random()*40)+60;
-      const html = `
-        <div class="card" style="margin-bottom:1.5rem;">
-          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
-            <h3>${file.name}</h3>
-            <span class="badge" style="background:#f0f9ff; color:#3b82f6; padding:0.25rem 0.75rem; border-radius:1rem; font-weight:600;">Rank #${idx+1}</span>
-          </div>
-          <p><strong>Overall Score:</strong> ${overall}%</p>
-          <div class="score-bar"><div class="score-fill score-blue" style="width:${overall}%;"></div></div>
-          <p><strong>Matching Score:</strong> ${matching}%</p>
-          <div class="score-bar"><div class="score-fill score-green" style="width:${matching}%;"></div></div>
-        </div>`;
-      resultsContainer.innerHTML += html;
-    });
-    showPage('page-results');
-  });
-
-  // Mock Suggestions for Upload & Suggest
-  document.getElementById('form-upload-suggest').addEventListener('submit', function(e){
-    e.preventDefault();
-    const file = document.getElementById('file-suggest').files[0];
-    if(!file) return alert('Select a file!');
-    const job = document.getElementById('job-suggest').value || 'General Position';
-    const resultDiv = document.getElementById('suggestion-result');
-    resultDiv.innerHTML = `
-      <h2>${file.name} - Target Job: ${job}</h2>
-      <div style="display:grid; grid-template-columns:1fr 1fr; gap:2rem; margin:2rem 0;">
-        <div>
-          <h3>Overall Score</h3>
-          <div class="score-bar"><div class="score-fill score-blue" style="width:82%;"></div></div>
-          <p style="font-weight:600;">82% - Excellent</p>
-        </div>
-        <div>
-          <h3>Job Match Score</h3>
-          <div class="score-bar"><div class="score-fill score-green" style="width:75%;"></div></div>
-          <p style="font-weight:600;">75% - Good Match</p>
-        </div>
-      </div>
-      <h3>Improvement Suggestions</h3>
-      <div class="suggestion">
-        <i class="fas fa-lightbulb" style="color:#f59e0b;"></i>
-        <div>
-          <strong>Add a professional email address</strong>
-          <p style="margin-top:0.25rem; font-size:0.9rem; color:#6b7280;">Use a formal email format (e.g., first.last@email.com) instead of casual addresses.</p>
-        </div>
-      </div>
-      <div class="suggestion">
-        <i class="fas fa-lightbulb" style="color:#f59e0b;"></i>
-        <div>
-          <strong>Include quantifiable achievements</strong>
-          <p style="margin-top:0.25rem; font-size:0.9rem; color:#6b7280;">Add specific metrics to your experience section (e.g., "Increased efficiency by 30%").</p>
-        </div>
-      </div>
-      <div class="suggestion">
-        <i class="fas fa-lightbulb" style="color:#f59e0b;"></i>
-        <div>
-          <strong>Consider adding your location</strong>
-          <p style="margin-top:0.25rem; font-size:0.9rem; color:#6b7280;">Include your city or region to help employers assess location compatibility.</p>
-        </div>
-      </div>
-      <div style="margin-top:2rem; padding-top:1.5rem; border-top:1px solid #e5e7eb;">
-        <p><strong>Next Steps:</strong> Based on your target role "${job}", consider adding more specific keywords related to this position to improve your match score further.</p>
-      </div>`;
-    showPage('page-suggestions');
-  });
-
-  // Initialize the page
-  document.addEventListener('DOMContentLoaded', function() {
-    // Show home page by default
-    showPage('page-home');
-  });
 </script>
 
 </body>
 </html>
+{% endblock %}
