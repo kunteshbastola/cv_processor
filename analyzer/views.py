@@ -18,11 +18,13 @@ from utiliy.suggestions import generate_resume_suggestions
 
 
 def home(request):
+    """Home page"""
     return render(request, "analyzer/index.html")
 
 
 @login_required
 def upload(request):
+    """Bulk CV upload for matching"""
     if request.method == "POST":
         form = CVUploadForm(request.POST, request.FILES)
         files = request.FILES.getlist("cv_files")
@@ -75,9 +77,7 @@ def upload(request):
                     cv_upload.skills_score = scores.get("skills", 0) or 0
                     cv_upload.format_score = scores.get("format", 0) or 0
 
-                    # ===============================
                     # Matching score logic
-                    # ===============================
                     matching_score = 0
                     total_criteria = 0
 
@@ -146,8 +146,8 @@ def upload(request):
 
 
 @login_required
-@login_required
 def matched_results(request):
+    """Display matched CV results"""
     matched_ids = request.session.get("matched_cv_ids", [])
     if not matched_ids:
         return render(request, "analyzer/matched_results.html", {
@@ -173,11 +173,11 @@ def matched_results(request):
 
 
 @login_required
-@login_required
 def upload_and_suggest(request):
+    """Single CV upload for suggestions"""
     if request.method == "POST":
         file = request.FILES.get("file")
-        job_name = request.POST.get("job_name", "").strip()  # Added .strip()
+        job_name = request.POST.get("job_name", "").strip()
 
         if not file:
             messages.error(request, "No CV file uploaded.")
@@ -224,9 +224,7 @@ def upload_and_suggest(request):
             cv_upload.skills_score = scores.get('skills', 0) or 0
             cv_upload.format_score = scores.get('format', 0) or 0
 
-            # ============================================
-            # GENERATE SUGGESTIONS - CORRECTED VERSION
-            # ============================================
+            # Generate suggestions
             resume_text = parsed_data.get('raw_text', '') or ''
             
             # Get AI suggestions for the specific job
@@ -238,13 +236,6 @@ def upload_and_suggest(request):
                 default_suggestions = "\n".join(default_suggestions_list)
             else:
                 default_suggestions = str(default_suggestions_list or "")
-            
-            # Debug logging (optional - remove in production)
-            import logging
-            logger = logging.getLogger(__name__)
-            logger.info(f"Job name: {job_name}")
-            logger.info(f"AI suggestions length: {len(job_suggestions or '')}")
-            logger.info(f"Default suggestions: {default_suggestions}")
             
             # COMBINE SUGGESTIONS INTELLIGENTLY
             final_suggestions = ""
@@ -311,9 +302,6 @@ def upload_and_suggest(request):
             cv_upload.processed = True
             cv_upload.save()
             
-            # Debug: Check what's being saved
-            logger.info(f"Final suggestions saved: {cv_upload.suggestions[:200]}...")
-            
             return render(request, "analyzer/cv_suggestions.html", {"cv": cv_upload})
 
         except Exception as e:
@@ -323,7 +311,6 @@ def upload_and_suggest(request):
                     default_storage.delete(cv_upload.file.name)
                 cv_upload.delete()
             
-            logger.error(f"Error processing CV: {str(e)}", exc_info=True)
             messages.error(request, f"Error processing file: {str(e)}")
             return render(request, "analyzer/upload_and_suggest.html")
 
@@ -332,6 +319,7 @@ def upload_and_suggest(request):
 
 @login_required
 def cv_suggestions(request, cv_id):
+    """Display CV suggestions"""
     cv = get_object_or_404(CVUpload, id=cv_id, user=request.user, processed=True)
     
     # Format suggestions for display
@@ -366,15 +354,15 @@ def cv_suggestions(request, cv_id):
 @api_view(['DELETE'])
 @permission_classes([IsAuthenticated])
 def api_delete_cv(request, cv_id):
+    """API endpoint to delete a CV"""
     cv = get_object_or_404(CVUpload, id=cv_id, user=request.user)
 
     # Delete file safely
-    if cv.file and default_storage.exists(cv.file.name):
+    if cv.file and default_storage.exists(cv_file.name):
         default_storage.delete(cv.file.name)
 
     cv.delete()
     return Response({"message": "CV deleted successfully"}, status=status.HTTP_204_NO_CONTENT)
-
 
 # @api_view(['POST'])
 # @permission_classes([IsAuthenticated])
