@@ -57,8 +57,9 @@ def upload(request):
 
                 try:
                     # Read file from storage (Render-safe)
-                    with default_storage.open(cv_upload.file.name, 'rb') as f:
-                        parsed_data = parser.parse_cv(f, file_ext)
+                    
+                    parsed_data = parser.parse_cv(cv_upload.file, file_ext)
+
 
                     scoring_results = scorer.score_cv(parsed_data)
 
