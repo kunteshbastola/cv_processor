@@ -1,35 +1,329 @@
-{% load static %}
-<!DOCTYPE html>
-<html>
-<head>
-    <title>CV Suggestions</title>
-    <link rel="stylesheet" href="{% static 'analyzer/style.css' %}">
-</head>
-<body>
+{% extends 'analyzer/base.html' %}
 
-<div class="container">
-    <h2>CV Analysis</h2>
+{% block title %}Suggestions - CV Analyzer{% endblock %}
 
-    <div class="card">
-        <p><strong>Filename:</strong> {{ cv.filename }}</p>
-        <p><strong>Overall Score:</strong> {{ cv.overall_score }}</p>
-        <p><strong>Matching Score:</strong> {{ cv.matching_score }}%</p>
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-10">
+        <!-- Header -->
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h2 class="text-primary">
+                    <i class="fas fa-lightbulb me-2"></i>CV Analysis & Suggestions
+                </h2>
+                <p class="text-muted">
+                    For: <strong>{{ cv.target_job_role|default:"Not specified" }}</strong>
+                    | Uploaded: {{ cv.uploaded_at|date:"F d, Y" }}
+                </p>
+            </div>
+            <div>
+                <a href="{{ cv.file.url }}" target="_blank" class="btn btn-outline-primary me-2">
+                    <i class="fas fa-download me-2"></i>Download Original
+                </a>
+                <a href="{% url 'upload_and_suggest' %}" class="btn btn-primary">
+                    <i class="fas fa-plus me-2"></i>Analyze Another
+                </a>
+            </div>
+        </div>
+
+        <div class="row">
+            <!-- Left Column: Scores -->
+            <div class="col-md-4 mb-4">
+                <!-- Overall Score -->
+                <div class="card shadow mb-4">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0"><i class="fas fa-star me-2"></i>Overall Score</h5>
+                    </div>
+                    <div class="card-body text-center">
+                        <div class="score-circle mx-auto mb-3">
+                            <div class="score-value">{{ cv.overall_score|floatformat:1 }}/100</div>
+                            <div class="score-label">Score</div>
+                        </div>
+                        <div class="star-rating mb-3">
+                            {% with stars=cv.overall_score|divide:20|floatformat:0 %}
+                            {% for i in "12345" %}
+                            <i class="fas fa-star fa-2x {% if forloop.counter <= stars|add:0 %}text-warning{% else %}text-secondary{% endif %}"></i>
+                            {% endfor %}
+                            {% endwith %}
+                        </div>
+                        <p class="text-muted">
+                            {% if cv.overall_score >= 80 %}
+                            <span class="badge bg-success">Excellent!</span>
+                            {% elif cv.overall_score >= 60 %}
+                            <span class="badge bg-warning">Good</span>
+                            {% else %}
+                            <span class="badge bg-danger">Needs Improvement</span>
+                            {% endif %}
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Detailed Scores -->
+                <div class="card shadow">
+                    <div class="card-header bg-success text-white">
+                        <h5 class="mb-0"><i class="fas fa-chart-bar me-2"></i>Detailed Scores</h5>
+                    </div>
+                    <div class="card-body">
+                        {% with scores=cv %}
+                        <div class="score-item mb-3">
+                            <div class="d-flex justify-content-between mb-1">
+                                <span>Contact Info</span>
+                                <strong>{{ scores.contact_score|floatformat:1 }}/20</strong>
+                            </div>
+                            <div class="progress" style="height: 10px;">
+                                <div class="progress-bar" role="progressbar" 
+                                     style="width: {{ scores.contact_score|multiply:5 }}%;"></div>
+                            </div>
+                        </div>
+                        
+                        <div class="score-item mb-3">
+                            <div class="d-flex justify-content-between mb-1">
+                                <span>Experience</span>
+                                <strong>{{ scores.experience_score|floatformat:1 }}/20</strong>
+                            </div>
+                            <div class="progress" style="height: 10px;">
+                                <div class="progress-bar bg-success" role="progressbar" 
+                                     style="width: {{ scores.experience_score|multiply:5 }}%;"></div>
+                            </div>
+                        </div>
+                        
+                        <div class="score-item mb-3">
+                            <div class="d-flex justify-content-between mb-1">
+                                <span>Education</span>
+                                <strong>{{ scores.education_score|floatformat:1 }}/20</strong>
+                            </div>
+                            <div class="progress" style="height: 10px;">
+                                <div class="progress-bar bg-info" role="progressbar" 
+                                     style="width: {{ scores.education_score|multiply:5 }}%;"></div>
+                            </div>
+                        </div>
+                        
+                        <div class="score-item mb-3">
+                            <div class="d-flex justify-content-between mb-1">
+                                <span>Skills</span>
+                                <strong>{{ scores.skills_score|floatformat:1 }}/20</strong>
+                            </div>
+                            <div class="progress" style="height: 10px;">
+                                <div class="progress-bar bg-warning" role="progressbar" 
+                                     style="width: {{ scores.skills_score|multiply:5 }}%;"></div>
+                            </div>
+                        </div>
+                        
+                        <div class="score-item mb-3">
+                            <div class="d-flex justify-content-between mb-1">
+                                <span>Formatting</span>
+                                <strong>{{ scores.format_score|floatformat:1 }}/20</strong>
+                            </div>
+                            <div class="progress" style="height: 10px;">
+                                <div class="progress-bar bg-secondary" role="progressbar" 
+                                     style="width: {{ scores.format_score|multiply:5 }}%;"></div>
+                            </div>
+                        </div>
+                        {% endwith %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column: Suggestions -->
+            <div class="col-md-8">
+                <div class="card shadow h-100">
+                    <div class="card-header bg-warning text-dark">
+                        <h5 class="mb-0"><i class="fas fa-comments me-2"></i>AI Improvement Suggestions</h5>
+                    </div>
+                    <div class="card-body">
+                        {% if suggestions %}
+                        <div class="suggestions-content">
+                            {{ suggestions|linebreaks }}
+                        </div>
+                        {% else %}
+                        <div class="text-center py-5">
+                            <i class="fas fa-robot fa-3x text-muted mb-3"></i>
+                            <h4>No suggestions available</h4>
+                            <p class="text-muted">The AI couldn't generate suggestions for this CV.</p>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Extracted Information -->
+                <div class="row mt-4">
+                    <div class="col-md-6">
+                        <div class="card shadow h-100">
+                            <div class="card-header bg-info text-white">
+                                <h6 class="mb-0"><i class="fas fa-graduation-cap me-2"></i>Education</h6>
+                            </div>
+                            <div class="card-body">
+                                {% if cv.education %}
+                                <p>{{ cv.education|linebreaks }}</p>
+                                {% else %}
+                                <p class="text-muted">No education information extracted</p>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <div class="card shadow h-100">
+                            <div class="card-header bg-success text-white">
+                                <h6 class="mb-0"><i class="fas fa-briefcase me-2"></i>Experience</h6>
+                            </div>
+                            <div class="card-body">
+                                {% if cv.experience %}
+                                <p>{{ cv.experience|linebreaks }}</p>
+                                {% else %}
+                                <p class="text-muted">No experience information extracted</p>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Skills -->
+                <div class="card shadow mt-4">
+                    <div class="card-header bg-primary text-white">
+                        <h6 class="mb-0"><i class="fas fa-code me-2"></i>Skills</h6>
+                    </div>
+                    <div class="card-body">
+                        {% if cv.skills %}
+                        <div class="skills-container">
+                            {% for skill in cv.skills|split:"," %}
+                            {% if skill.strip %}
+                            <span class="badge bg-primary me-2 mb-2 p-2">{{ skill.strip }}</span>
+                            {% endif %}
+                            {% endfor %}
+                        </div>
+                        {% else %}
+                        <p class="text-muted">No skills information extracted</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="mt-4 d-flex justify-content-between">
+            <a href="{% url 'upload_and_suggest' %}" class="btn btn-outline-primary">
+                <i class="fas fa-redo me-2"></i>Analyze Another CV
+            </a>
+            <div>
+                <button class="btn btn-outline-success me-2" onclick="window.print()">
+                    <i class="fas fa-print me-2"></i>Print Report
+                </button>
+                <a href="#" class="btn btn-success" id="saveReport">
+                    <i class="fas fa-save me-2"></i>Save Report
+                </a>
+            </div>
+        </div>
     </div>
-
-    <h3>Score Breakdown</h3>
-    <ul>
-        <li>Contact: {{ cv.contact_score }}</li>
-        <li>Experience: {{ cv.experience_score }}</li>
-        <li>Education: {{ cv.education_score }}</li>
-        <li>Skills: {{ cv.skills_score }}</li>
-        <li>Format: {{ cv.format_score }}</li>
-    </ul>
-
-    <h3>Suggestions</h3>
-    <pre class="suggestions">{{ suggestions }}</pre>
-
-    <a href="{% url 'matched_results' %}" class="btn secondary">Back to Results</a>
 </div>
+{% endblock %}
 
-</body>
-</html>
+{% block extra_css %}
+<style>
+.score-circle {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    color: white;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+.score-value {
+    font-size: 2rem;
+    font-weight: bold;
+}
+
+.score-label {
+    font-size: 0.9rem;
+    opacity: 0.9;
+}
+
+.star-rating {
+    font-size: 1.5rem;
+}
+
+.suggestions-content {
+    max-height: 400px;
+    overflow-y: auto;
+    padding-right: 10px;
+}
+
+.suggestions-content::-webkit-scrollbar {
+    width: 6px;
+}
+
+.suggestions-content::-webkit-scrollbar-track {
+    background: #f1f1f1;
+}
+
+.suggestions-content::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 3px;
+}
+
+.skills-container {
+    display: flex;
+    flex-wrap: wrap;
+}
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+$(document).ready(function() {
+    // Save report functionality
+    $('#saveReport').on('click', function(e) {
+        e.preventDefault();
+        
+        const reportData = {
+            job_role: '{{ cv.target_job_role|default:"Not specified" }}',
+            overall_score: {{ cv.overall_score|floatformat:1 }},
+            suggestions: '{{ suggestions|escapejs }}',
+            timestamp: new Date().toISOString()
+        };
+        
+        const blob = new Blob([JSON.stringify(reportData, null, 2)], {
+            type: 'application/json'
+        });
+        
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `cv_report_${Date.now()}.json`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        
+        showToast('Report saved successfully!', 'success');
+    });
+    
+    function showToast(message, type) {
+        const toast = $(`
+            <div class="toast align-items-center text-white bg-${type} border-0"
+                role="alert" aria-live="assertive" aria-atomic="true">
+                <div class="d-flex">
+                    <div class="toast-body">
+                        <i class="fas fa-check-circle me-2"></i>
+                        ${message}
+                    </div>
+                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+                </div>
+            </div>
+        `);
+        
+        $('.toast-container').remove();
+        $('body').append(`<div class="toast-container position-fixed top-0 end-0 p-3"></div>`);
+        $('.toast-container').append(toast);
+        
+        const bsToast = new bootstrap.Toast(toast[0]);
+        bsToast.show();
+    }
+});
+</script>
+{% endblock %}

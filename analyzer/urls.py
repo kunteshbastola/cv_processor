@@ -3,6 +3,10 @@ from . import views
 
 urlpatterns = [
     path('', views.home, name='home'),
+    path('upload/', views.upload, name='upload'),
+    path('upload-and-suggest/', views.upload_and_suggest, name='upload_and_suggest'),
+    path('matched-results/', views.matched_results, name='matched_results'),
+    path('cv-suggestions/<int:cv_id>/', views.cv_suggestions, name='cv_suggestions'),
     
 ]
 

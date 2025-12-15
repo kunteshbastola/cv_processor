@@ -1,0 +1,121 @@
+{% extends 'analyzer/base.html' %}
+
+{% block title %}Home - CV Analyzer{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-10 text-center">
+        <!-- Hero Section -->
+        <div class="hero-section mb-5">
+            <h1 class="display-4 mb-4 text-primary">
+                <i class="fas fa-file-contract me-3"></i>Smart CV Analyzer
+            </h1>
+            <p class="lead mb-4">
+                Upload, analyze, and get intelligent suggestions for your resumes.
+                Match candidates with job requirements instantly!
+            </p>
+            
+            {% if not user.is_authenticated %}
+            <div class="mt-4">
+                <a href="{% url 'register' %}" class="btn btn-primary btn-lg me-3">
+                    <i class="fas fa-user-plus me-2"></i>Get Started
+                </a>
+                <a href="{% url 'login' %}" class="btn btn-outline-primary btn-lg">
+                    <i class="fas fa-sign-in-alt me-2"></i>Login
+                </a>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Features -->
+        <div class="row mt-5">
+            <div class="col-md-4 mb-4">
+                <div class="card h-100 feature-card">
+                    <div class="card-body text-center">
+                        <div class="feature-icon mb-3">
+                            <i class="fas fa-upload fa-3x text-primary"></i>
+                        </div>
+                        <h4 class="card-title">Bulk Upload</h4>
+                        <p class="card-text">
+                            Upload multiple CVs at once and get matching scores against job requirements.
+                            Perfect for recruiters!
+                        </p>
+                        {% if user.is_authenticated %}
+                        <a href="{% url 'upload' %}" class="btn btn-outline-primary">Try Now</a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-4 mb-4">
+                <div class="card h-100 feature-card">
+                    <div class="card-body text-center">
+                        <div class="feature-icon mb-3">
+                            <i class="fas fa-lightbulb fa-3x text-warning"></i>
+                        </div>
+                        <h4 class="card-title">AI Suggestions</h4>
+                        <p class="card-text">
+                            Get intelligent suggestions to improve your resume based on target job role.
+                        </p>
+                        {% if user.is_authenticated %}
+                        <a href="{% url 'upload_and_suggest' %}" class="btn btn-outline-warning">Get Suggestions</a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-4 mb-4">
+                <div class="card h-100 feature-card">
+                    <div class="card-body text-center">
+                        <div class="feature-icon mb-3">
+                            <i class="fas fa-chart-bar fa-3x text-success"></i>
+                        </div>
+                        <h4 class="card-title">Detailed Analysis</h4>
+                        <p class="card-text">
+                            Comprehensive scoring across contact info, experience, education, skills, and formatting.
+                        </p>
+                        {% if user.is_authenticated %}
+                        <a href="{% url 'matched_results' %}" class="btn btn-outline-success">View Results</a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- How It Works -->
+        <div class="mt-5 pt-5">
+            <h2 class="mb-4">How It Works</h2>
+            <div class="row">
+                <div class="col-md-3 mb-3">
+                    <div class="step">
+                        <div class="step-number">1</div>
+                        <h5>Upload CV</h5>
+                        <p>Upload PDF, DOC, DOCX, or TXT files</p>
+                    </div>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <div class="step">
+                        <div class="step-number">2</div>
+                        <h5>Set Requirements</h5>
+                        <p>Define job role and required skills</p>
+                    </div>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <div class="step">
+                        <div class="step-number">3</div>
+                        <h5>AI Analysis</h5>
+                        <p>Get instant scoring and matching</p>
+                    </div>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <div class="step">
+                        <div class="step-number">4</div>
+                        <h5>Get Results</h5>
+                        <p>View rankings and suggestions</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
