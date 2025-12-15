@@ -1,7 +1,9 @@
 from django import forms
 import os
 
+# ---------------- EDUCATION OPTIONS ----------------
 EDUCATION_CHOICES = [
+    ('', 'Select Education'),  # default empty option
     ('High School', 'High School'),
     ('Diploma', 'Diploma'),
     ('Bachelors', 'Bachelors'),
@@ -24,9 +26,9 @@ class CVUploadForm(forms.Form):
         required=False,
         min_value=0,
         label="Minimum Years of Experience",
-        widget=forms.TextInput(attrs={
-        "class": "form-control",
-        "placeholder": "e.g., Bachelor's in Computer Science"
+        widget=forms.NumberInput(attrs={
+            "class": "form-control",
+            "placeholder": "e.g., 3"
         })
     )
 
@@ -47,24 +49,20 @@ class CVUploadForm(forms.Form):
     )
 
     # ---------------- CLEAN METHODS ----------------
-
     def clean_required_skills(self):
+        """
+        Convert comma-separated skills into a list of lowercase strings
+        """
         skills = self.cleaned_data.get("required_skills", "")
         if not skills:
             return []
-
-        return [
-            s.strip().lower()
-            for s in skills.split(",")
-            if s.strip()
-        ]
+        return [s.strip().lower() for s in skills.split(",") if s.strip()]
 
     # ---------------- FILE VALIDATION ----------------
-
     def validate_multiple_files(self, files):
         """
-        Call in the view:
-        form.validate_multiple_files(request.FILES.getlist("cv_files"))
+        Validate uploaded CV files.
+        Call in the view: form.validate_multiple_files(request.FILES.getlist("cv_files"))
         """
         if not files:
             raise forms.ValidationError("Please upload at least one CV.")

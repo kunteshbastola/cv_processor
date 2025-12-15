@@ -16,7 +16,6 @@ from .parser import CVParser
 from .cv_scorer import CVScorer
 from utiliy.suggestions import generate_job_keyword_suggestions
 
-
 logger = logging.getLogger(__name__)
 
 
@@ -26,21 +25,16 @@ def home(request):
 
 @login_required
 def upload(request):
-    """Bulk CV upload for matching"""
+    """Bulk CV upload and matching"""
     if request.method == "POST":
         form = CVUploadForm(request.POST, request.FILES)
         files = request.FILES.getlist("cv_files")
-
         job_name = (request.POST.get("job_name") or "").strip()
 
         if form.is_valid():
             required_experience = form.cleaned_data.get('required_experience')
             required_education = (form.cleaned_data.get('required_education') or '').lower()
-            required_skills = [
-                s.strip().lower()
-                for s in form.cleaned_data.get('required_skills', '').split(',')
-                if s.strip()
-            ]
+            required_skills = form.cleaned_data.get('required_skills', [])  # Already a list
 
             # Clear previous CVs for this user
             CVUpload.objects.filter(user=request.user).delete()
@@ -55,43 +49,44 @@ def upload(request):
                     messages.error(request, f"File too large (max 5MB): {file.name}")
                     continue
 
-                cv_upload = CVUpload(user=request.user, file=file, target_job_role=form.cleaned_data.get('job_name', ''))
+                cv_upload = CVUpload(
+                    user=request.user,
+                    file=file,
+                    target_job_role=form.cleaned_data.get('job_name', '')
+                )
                 cv_upload.save()
 
                 try:
-                    # Read file from storage (Render-safe)
-                    
+                    # Parse CV content
                     parsed_data = parser.parse_cv(cv_upload.file, file_ext)
 
-
+                    # Score CV
                     scoring_results = scorer.score_cv(parsed_data, job_name)
 
+                    # Save parsed data
+                    cv_upload.raw_text = parsed_data.get("raw_text", "")
+                    cv_upload.experience = parsed_data.get("experience", "")
+                    cv_upload.education = parsed_data.get("education", "")
+                    cv_upload.skills = parsed_data.get("skills", "")
 
-                    # Save parsed content
-                    cv_upload.raw_text = parsed_data.get("raw_text", '') or ''
-                    cv_upload.experience = parsed_data.get("experience", '') or ''
-                    cv_upload.education = parsed_data.get("education", '') or ''
-                    cv_upload.skills = parsed_data.get("skills", '') or ''
-
-                    # Save scores
+                    # Save scoring
                     scores = scoring_results.get("section_scores", {})
-                    cv_upload.overall_score = scoring_results.get("overall_score", 0) or 0
-                    cv_upload.contact_score = scores.get("contact", 0) or 0
-                    cv_upload.experience_score = scores.get("experience", 0) or 0
-                    cv_upload.education_score = scores.get("education", 0) or 0
-                    cv_upload.skills_score = scores.get("skills", 0) or 0
-                    cv_upload.format_score = scores.get("format", 0) or 0
+                    cv_upload.overall_score = scoring_results.get("overall_score", 0)
+                    cv_upload.contact_score = scores.get("contact", 0)
+                    cv_upload.experience_score = scores.get("experience", 0)
+                    cv_upload.education_score = scores.get("education", 0)
+                    cv_upload.skills_score = scores.get("skills", 0)
+                    cv_upload.format_score = scores.get("format", 0)
 
                     # Calculate matching score
                     matching_score = 0
                     total_criteria = 0
 
                     # Experience
-                    if required_experience:
+                    if required_experience is not None:
                         total_criteria += 1
                         exp_years = 0
                         try:
-                            # Extract year ranges like 2019-2022
                             for start_str, end_str in re.findall(r'(\d{4})\s*[-–]\s*(\d{4})', cv_upload.experience):
                                 exp_years += max(0, int(end_str) - int(start_str))
                             if exp_years == 0:
@@ -100,7 +95,7 @@ def upload(request):
                                     exp_years = max(years) - min(years)
                         except Exception:
                             exp_years = 0
-                        if exp_years >= int(required_experience):
+                        if exp_years >= required_experience:
                             matching_score += 1
 
                     # Education
@@ -170,7 +165,8 @@ def matched_results(request):
 
 @login_required
 def upload_and_suggest(request):
-    suggestions = []  # initialize
+    cv_upload = None
+    suggestions = []
     if request.method == "POST":
         file = request.FILES.get("file")
         job_name = (request.POST.get("job_name") or "").strip()
@@ -190,13 +186,9 @@ def upload_and_suggest(request):
 
         try:
             parser = CVParser()
-            scorer = CVScorer()
-
-            # Pass the actual file path to the parser
-            file_path = cv_upload.file.path
-            parsed_data = parser.parse_cv(file_path, file_ext)
-
-            # Generate job-specific suggestions
+            # Parse CV
+            parsed_data = parser.parse_cv(cv_upload.file.path, file_ext)
+            # Generate suggestions
             suggestions = generate_job_keyword_suggestions(parsed_data.get("raw_text", ""), job_name)
 
             # Save CV info
@@ -214,14 +206,14 @@ def upload_and_suggest(request):
     })
 
 
-
-
 @login_required
 def cv_suggestions(request, cv_id):
     cv = get_object_or_404(CVUpload, id=cv_id, user=request.user, processed=True)
     suggestions = (cv.suggestions or "").strip()
-    return render(request, "analyzer/cv_suggestions.html", {"cv": cv, "suggestions": suggestions[:2000]})
-
+    return render(request, "analyzer/cv_suggestions.html", {
+        "cv": cv,
+        "suggestions": suggestions[:2000]
+    })
 
 
 @api_view(['DELETE'])
