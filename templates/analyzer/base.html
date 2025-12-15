@@ -11,218 +11,12 @@
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
-    <!-- Google Fonts - Inter (HireIQ style) -->
+    <!-- Google Fonts - Inter -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     
     <!-- Custom CSS -->
     {% load static %}
     <link rel="stylesheet" href="{% static 'analyzer/css/style.css' %}">
-    
-    <style>
-        :root {
-            --primary: #3b82f6;
-            --primary-dark: #2563eb;
-            --secondary: #10b981;
-            --secondary-dark: #059669;
-            --dark: #1f2937;
-            --light: #f9fafb;
-            --gray: #6b7280;
-            --light-gray: #e5e7eb;
-        }
-        
-        body {
-            font-family: 'Inter', sans-serif;
-            color: var(--dark);
-            line-height: 1.6;
-        }
-        
-        /* HireIQ Navigation */
-        .navbar-hireiq {
-            background: white;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-            padding: 1rem 0;
-        }
-        
-        .navbar-brand-hireiq {
-            font-size: 1.5rem;
-            font-weight: 700;
-            color: var(--dark);
-            text-decoration: none;
-        }
-        
-        .navbar-brand-hireiq i {
-            color: var(--primary);
-        }
-        
-        .nav-link-hireiq {
-            color: var(--gray) !important;
-            font-weight: 500;
-            margin: 0 0.5rem;
-        }
-        
-        .nav-link-hireiq:hover, .nav-link-hireiq.active {
-            color: var(--primary) !important;
-        }
-        
-        /* HireIQ Hero */
-        .hero-hireiq {
-            background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
-            padding: 6rem 0 5rem;
-        }
-        
-        .hero-title {
-            font-size: 3.5rem;
-            font-weight: 800;
-            line-height: 1.1;
-            margin-bottom: 1.5rem;
-            background: linear-gradient(to right, #1e3a8a, #3b82f6);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-        
-        @media (max-width: 768px) {
-            .hero-title {
-                font-size: 2.5rem;
-            }
-        }
-        
-        .hero-subtitle {
-            font-size: 1.25rem;
-            color: var(--gray);
-            max-width: 700px;
-            margin: 0 auto 2.5rem;
-        }
-        
-        /* HireIQ Buttons */
-        .btn-hireiq {
-            padding: 0.875rem 1.75rem;
-            font-weight: 600;
-            border-radius: 0.5rem;
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-            transition: all 0.3s ease;
-        }
-        
-        .btn-hireiq-primary {
-            background-color: var(--primary);
-            border-color: var(--primary);
-            color: white;
-        }
-        
-        .btn-hireiq-primary:hover {
-            background-color: var(--primary-dark);
-            border-color: var(--primary-dark);
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
-        }
-        
-        .btn-hireiq-success {
-            background-color: var(--secondary);
-            border-color: var(--secondary);
-            color: white;
-        }
-        
-        .btn-hireiq-success:hover {
-            background-color: var(--secondary-dark);
-            border-color: var(--secondary-dark);
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
-        }
-        
-        /* HireIQ Cards */
-        .card-hireiq {
-            background: white;
-            border-radius: 1rem;
-            padding: 2rem;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-            transition: all 0.3s ease;
-            height: 100%;
-            border: 1px solid var(--light-gray);
-        }
-        
-        .card-hireiq:hover {
-            transform: translateY(-8px);
-            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.12);
-        }
-        
-        /* HireIQ Sections */
-        .section-hireiq {
-            padding: 5rem 0;
-        }
-        
-        .section-title {
-            font-size: 2.5rem;
-            font-weight: 700;
-            text-align: center;
-            margin-bottom: 1rem;
-            color: var(--dark);
-        }
-        
-        .section-subtitle {
-            font-size: 1.125rem;
-            text-align: center;
-            color: var(--gray);
-            max-width: 700px;
-            margin: 0 auto 3rem;
-        }
-        
-        /* HireIQ Footer */
-        .footer-hireiq {
-            background: var(--dark);
-            color: white;
-            padding: 4rem 0 2rem;
-            margin-top: auto;
-        }
-        
-        .footer-title {
-            font-size: 1rem;
-            font-weight: 600;
-            margin-bottom: 1.25rem;
-        }
-        
-        .footer-link {
-            display: block;
-            color: #d1d5db;
-            text-decoration: none;
-            margin-bottom: 0.75rem;
-            font-size: 0.9rem;
-        }
-        
-        .footer-link:hover {
-            color: white;
-        }
-        
-        .copyright {
-            text-align: center;
-            padding-top: 2rem;
-            border-top: 1px solid #374151;
-            color: #9ca3af;
-            font-size: 0.875rem;
-        }
-        
-        /* Feature Icons */
-        .feature-icon {
-            font-size: 2.5rem;
-            margin-bottom: 1.5rem;
-            color: var(--primary);
-        }
-        
-        /* Step Numbers */
-        .step-number {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            width: 3rem;
-            height: 3rem;
-            background: var(--primary);
-            color: white;
-            border-radius: 50%;
-            font-size: 1.5rem;
-            font-weight: 700;
-            margin-bottom: 1.5rem;
-        }
-    </style>
     
     {% block extra_css %}{% endblock %}
 </head>
@@ -240,42 +34,17 @@
                 <ul class="navbar-nav ms-auto">
                     <li class="nav-item">
                         <a class="nav-link nav-link-hireiq {% if request.resolver_match.url_name == 'home' %}active{% endif %}" 
-                           href="{% url 'home' %}">
-                            Home
-                        </a>
+                           href="{% url 'home' %}">Home</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link nav-link-hireiq {% if request.resolver_match.url_name == 'upload' %}active{% endif %}" 
-                           href="{% url 'upload' %}">
-                            CV Matching
-                        </a>
+                           href="{% url 'upload' %}">CV Matching</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link nav-link-hireiq {% if request.resolver_match.url_name == 'upload_and_suggest' %}active{% endif %}" 
-                           href="{% url 'upload_and_suggest' %}">
-                            CV Suggestions
-                        </a>
+                           href="{% url 'upload_and_suggest' %}">CV Suggestions</a>
                     </li>
-                    {% if user.is_authenticated %}
-                    <li class="nav-item dropdown">
-                        <a class="nav-link nav-link-hireiq dropdown-toggle" href="#" role="button" 
-                           data-bs-toggle="dropdown">
-                            <i class="fas fa-user me-1"></i> {{ user.username }}
-                        </a>
-                        <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" href="{% url 'dashboard' %}">
-                                <i class="fas fa-tachometer-alt me-2"></i> Dashboard
-                            </a></li>
-                            <li><a class="dropdown-item" href="{% url 'profile' %}">
-                                <i class="fas fa-user-circle me-2"></i> Profile
-                            </a></li>
-                            <li><hr class="dropdown-divider"></li>
-                            <li><a class="dropdown-item" href="{% url 'logout' %}">
-                                <i class="fas fa-sign-out-alt me-2"></i> Logout
-                            </a></li>
-                        </ul>
-                    </li>
-                    {% endif %}
+                    <!-- Login link removed because no login page exists -->
                 </ul>
             </div>
         </div>
@@ -295,9 +64,7 @@
 
     <!-- Main Content -->
     <main>
-        {% block content %}
-        <!-- Content will be injected here from child templates -->
-        {% endblock %}
+        {% block content %}{% endblock %}
     </main>
 
     <!-- Footer -->
@@ -333,7 +100,7 @@
                     <a href="#" class="footer-link">YouTube</a>
                 </div>
             </div>
-            <div class="copyright">
+            <div class="copyright text-center mt-3">
                 &copy; 2023 CV Analyzer. All rights reserved.
             </div>
         </div>
@@ -343,8 +110,6 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <!-- jQuery -->
     <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
-    
-    {% load static %}
     <script src="{% static 'analyzer/js/main.js' %}"></script>
     
     {% block extra_js %}{% endblock %}
