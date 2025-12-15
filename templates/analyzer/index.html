@@ -1,545 +1,199 @@
 {% extends 'analyzer/base.html' %}
 {% load static %}
 
-{% block title %}Home - CV Analyzer{% endblock %}
-
-{% block extra_css %}
-<style>
-  :root {
-    --primary: #3b82f6;
-    --primary-dark: #2563eb;
-    --secondary: #10b981;
-    --secondary-dark: #059669;
-    --dark: #1f2937;
-    --light: #f9fafb;
-    --gray: #6b7280;
-    --light-gray: #e5e7eb;
-  }
-  
-  .section {
-    padding: 5rem 0;
-  }
-  
-  .section-title {
-    font-size: 2.5rem;
-    font-weight: 700;
-    text-align: center;
-    margin-bottom: 1rem;
-    color: var(--dark);
-  }
-  
-  .section-subtitle {
-    font-size: 1.125rem;
-    text-align: center;
-    color: var(--gray);
-    max-width: 700px;
-    margin: 0 auto 3rem;
-  }
-  
-  .btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    padding: 0.875rem 1.75rem;
-    font-size: 1rem;
-    font-weight: 600;
-    border-radius: 0.5rem;
-    border: none;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    text-decoration: none;
-    gap: 0.5rem;
-  }
-  
-  .btn-primary {
-    background-color: var(--primary);
-    color: white;
-  }
-  
-  .btn-primary:hover {
-    background-color: var(--primary-dark);
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
-  }
-  
-  .btn-success {
-    background-color: var(--secondary);
-    color: white;
-  }
-  
-  .btn-success:hover {
-    background-color: var(--secondary-dark);
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
-  }
-  
-  .card {
-    background: white;
-    border-radius: 1rem;
-    padding: 2rem;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-    transition: all 0.3s ease;
-    height: 100%;
-    border: 1px solid var(--light-gray);
-  }
-  
-  .card:hover {
-    transform: translateY(-8px);
-    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.12);
-  }
-  
-  .grid {
-    display: grid;
-    gap: 1.5rem;
-  }
-  
-  .grid-2 {
-    grid-template-columns: repeat(2, 1fr);
-  }
-  
-  .grid-3 {
-    grid-template-columns: repeat(3, 1fr);
-  }
-  
-  .grid-4 {
-    grid-template-columns: repeat(4, 1fr);
-  }
-  
-  .feature-icon {
-    font-size: 2.5rem;
-    margin-bottom: 1.5rem;
-    color: var(--primary);
-  }
-  
-  .feature-title {
-    font-size: 1.25rem;
-    font-weight: 600;
-    margin-bottom: 0.75rem;
-  }
-  
-  .feature-desc {
-    color: var(--gray);
-  }
-  
-  .step-number {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 3rem;
-    height: 3rem;
-    background: var(--primary);
-    color: white;
-    border-radius: 50%;
-    font-size: 1.5rem;
-    font-weight: 700;
-    margin-bottom: 1.5rem;
-  }
-  
-  .step-title {
-    font-size: 1.25rem;
-    font-weight: 600;
-    margin-bottom: 0.75rem;
-  }
-  
-  .audience-card {
-    text-align: center;
-    padding: 2.5rem 2rem;
-  }
-  
-  .audience-icon {
-    font-size: 3rem;
-    margin-bottom: 1.5rem;
-  }
-  
-  .audience-title {
-    font-size: 1.5rem;
-    font-weight: 600;
-    margin-bottom: 1rem;
-  }
-  
-  .audience-desc {
-    color: var(--gray);
-    margin-bottom: 1.5rem;
-  }
-  
-  .faq-item {
-    margin-bottom: 1rem;
-    border-radius: 0.75rem;
-    overflow: hidden;
-  }
-  
-  .faq-question {
-    background: white;
-    padding: 1.25rem;
-    font-weight: 600;
-    cursor: pointer;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    border: 1px solid var(--light-gray);
-    border-radius: 0.75rem;
-  }
-  
-  .faq-question:hover {
-    background-color: #f9fafb;
-  }
-  
-  .faq-answer {
-    padding: 1.25rem;
-    background: #f9fafb;
-    color: var(--gray);
-    border-top: none;
-    border-radius: 0 0 0.75rem 0.75rem;
-  }
-  
-  .hidden {
-    display: none;
-  }
-  
-  .hero {
-    padding: 6rem 0 5rem;
-    text-align: center;
-    background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
-  }
-  
-  .hero-title {
-    font-size: 3.5rem;
-    font-weight: 800;
-    line-height: 1.1;
-    margin-bottom: 1.5rem;
-    background: linear-gradient(to right, #1e3a8a, #3b82f6);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-  }
-  
-  .hero-subtitle {
-    font-size: 1.25rem;
-    color: var(--gray);
-    max-width: 700px;
-    margin: 0 auto 2.5rem;
-  }
-  
-  .hero-buttons {
-    display: flex;
-    gap: 1rem;
-    justify-content: center;
-    margin-bottom: 3rem;
-  }
-  
-  .nav-custom {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 1.5rem 0;
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 1.5rem 1.5rem;
-  }
-  
-  .logo-custom {
-    font-size: 1.5rem;
-    font-weight: 700;
-    color: var(--dark);
-    text-decoration: none;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-  }
-  
-  .nav-links-custom {
-    display: flex;
-    gap: 2rem;
-    align-items: center;
-  }
-  
-  .nav-link-custom {
-    color: var(--gray);
-    text-decoration: none;
-    font-weight: 500;
-    transition: color 0.3s;
-  }
-  
-  .nav-link-custom:hover {
-    color: var(--primary);
-  }
-  
-  footer {
-    background: var(--dark);
-    color: white;
-    padding: 4rem 0 2rem;
-  }
-  
-  .footer-links {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 2rem;
-    margin-bottom: 3rem;
-    max-width: 1200px;
-    margin: 0 auto 3rem;
-    padding: 0 1.5rem;
-  }
-  
-  .footer-title {
-    font-size: 1rem;
-    font-weight: 600;
-    margin-bottom: 1.25rem;
-  }
-  
-  .footer-link {
-    display: block;
-    color: #d1d5db;
-    text-decoration: none;
-    margin-bottom: 0.75rem;
-  }
-  
-  .footer-link:hover {
-    color: white;
-  }
-  
-  .copyright {
-    text-align: center;
-    padding-top: 2rem;
-    border-top: 1px solid #374151;
-    color: #9ca3af;
-    font-size: 0.875rem;
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 2rem 1.5rem 0;
-  }
-  
-  @media (max-width: 768px) {
-    .grid-2, .grid-3, .grid-4 {
-      grid-template-columns: 1fr;
-    }
-    
-    .hero-title {
-      font-size: 2.5rem;
-    }
-    
-    .hero-buttons {
-      flex-direction: column;
-      align-items: center;
-    }
-    
-    .nav-links-custom {
-      display: none;
-    }
-    
-    .footer-links {
-      grid-template-columns: repeat(2, 1fr);
-    }
-  }
-</style>
-{% endblock %}
+{% block title %}CV Analyzer - AI-Powered Resume Ranking System{% endblock %}
 
 {% block content %}
 <!-- Hero Section -->
-<section class="hero">
-  <div class="container">
-    <h1 class="hero-title">AI-Powered CV Ranking System</h1>
-    <p class="hero-subtitle">Automatically evaluate and rank resumes based on job descriptions using advanced AI and NLP technology.</p>
-    <div class="hero-buttons">
-      <a href="{% url 'upload' %}" class="btn btn-primary">
-        <i class="fas fa-upload"></i> Try as Recruiter
-      </a>
-      <a href="{% url 'upload_and_suggest' %}" class="btn btn-success">
-        <i class="fas fa-user-check"></i> Try as Job Seeker
-      </a>
+<section class="hero-hireiq">
+    <div class="container text-center">
+        <h1 class="hero-title">AI-Powered CV Ranking System</h1>
+        <p class="hero-subtitle">Automatically evaluate and rank resumes based on job descriptions using advanced AI and NLP technology.</p>
+        <div class="d-flex flex-wrap justify-content-center gap-3 mb-5">
+            <a href="{% url 'upload' %}" class="btn btn-hireiq btn-hireiq-primary">
+                <i class="fas fa-upload"></i> Try as Recruiter
+            </a>
+            <a href="{% url 'upload_and_suggest' %}" class="btn btn-hireiq btn-hireiq-success">
+                <i class="fas fa-user-check"></i> Try as Job Seeker
+            </a>
+        </div>
+        
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="card-hireiq text-center">
+                    <div class="feature-icon">🔍</div>
+                    <h3 class="h4 mb-3">Automatic CV Ranking</h3>
+                    <p class="text-muted">Rank CVs based on job relevance in seconds using sophisticated AI algorithms.</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card-hireiq text-center">
+                    <div class="feature-icon">📊</div>
+                    <h3 class="h4 mb-3">Skill Gap Detection</h3>
+                    <p class="text-muted">Identify missing skills compared to the job description for better hiring decisions.</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card-hireiq text-center">
+                    <div class="feature-icon">🧠</div>
+                    <h3 class="h4 mb-3">AI & NLP Powered</h3>
+                    <p class="text-muted">Uses modern natural language processing for accurate scoring and analysis.</p>
+                </div>
+            </div>
+        </div>
     </div>
-    <div class="grid grid-3">
-      <div class="card">
-        <div class="feature-icon">🔍</div>
-        <h3 class="feature-title">Automatic CV Ranking</h3>
-        <p class="feature-desc">Rank CVs based on job relevance in seconds using sophisticated AI algorithms.</p>
-      </div>
-      <div class="card">
-        <div class="feature-icon">📊</div>
-        <h3 class="feature-title">Skill Gap Detection</h3>
-        <p class="feature-desc">Identify missing skills compared to the job description for better hiring decisions.</p>
-      </div>
-      <div class="card">
-        <div class="feature-icon">🧠</div>
-        <h3 class="feature-title">AI & NLP Powered</h3>
-        <p class="feature-desc">Uses modern natural language processing for accurate scoring and analysis.</p>
-      </div>
-    </div>
-  </div>
 </section>
 
 <!-- Who Is It For? -->
-<section class="section">
-  <div class="container">
-    <h2 class="section-title">Who Is It For?</h2>
-    <p class="section-subtitle">CV Analyzer is designed to help both recruiters and job seekers optimize the hiring process.</p>
-    <div class="grid grid-2">
-      <div class="card audience-card">
-        <div class="audience-icon">👥</div>
-        <h3 class="audience-title">Recruiters</h3>
-        <p class="audience-desc">Want to shortlist CVs faster and smarter? Streamline your recruitment process with AI-powered ranking and insights.</p>
-        <a href="{% url 'upload' %}" class="btn btn-primary">Try as Recruiter</a>
-      </div>
-      <div class="card audience-card">
-        <div class="audience-icon">👤</div>
-        <h3 class="audience-title">Job Seekers</h3>
-        <p class="audience-desc">Want to improve your chances of getting hired? Optimize your CV for specific job descriptions with personalized suggestions.</p>
-        <a href="{% url 'upload_and_suggest' %}" class="btn btn-success">Try as Job Seeker</a>
-      </div>
+<section class="section-hireiq">
+    <div class="container">
+        <h2 class="section-title">Who Is It For?</h2>
+        <p class="section-subtitle">CV Analyzer is designed to help both recruiters and job seekers optimize the hiring process.</p>
+        
+        <div class="row g-4">
+            <div class="col-md-6">
+                <div class="card-hireiq text-center">
+                    <div class="feature-icon">👥</div>
+                    <h3 class="h4 mb-3">Recruiters</h3>
+                    <p class="text-muted mb-4">Want to shortlist CVs faster and smarter? Streamline your recruitment process with AI-powered ranking and insights.</p>
+                    <a href="{% url 'upload' %}" class="btn btn-hireiq btn-hireiq-primary">Try as Recruiter</a>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card-hireiq text-center">
+                    <div class="feature-icon">👤</div>
+                    <h3 class="h4 mb-3">Job Seekers</h3>
+                    <p class="text-muted mb-4">Want to improve your chances of getting hired? Optimize your CV for specific job descriptions with personalized suggestions.</p>
+                    <a href="{% url 'upload_and_suggest' %}" class="btn btn-hireiq btn-hireiq-success">Try as Job Seeker</a>
+                </div>
+            </div>
+        </div>
     </div>
-  </div>
 </section>
 
 <!-- How It Works -->
-<section class="section bg-light">
-  <div class="container">
-    <h2 class="section-title">How It Works</h2>
-    <p class="section-subtitle">Get from CV upload to actionable insights in three simple steps.</p>
-    <div class="grid grid-3">
-      <div class="card">
-        <div class="step-number">1</div>
-        <h3 class="step-title">Upload CV</h3>
-        <p>Upload one or more CVs and provide job requirements to get started with the analysis.</p>
-      </div>
-      <div class="card">
-        <div class="step-number">2</div>
-        <h3 class="step-title">AI Evaluation</h3>
-        <p>The system matches and scores CVs using advanced NLP algorithms and keyword analysis.</p>
-      </div>
-      <div class="card">
-        <div class="step-number">3</div>
-        <h3 class="step-title">Get Insights</h3>
-        <p>See ranking, skill gaps, and improvement suggestions instantly with detailed reports.</p>
-      </div>
+<section class="section-hireiq bg-light">
+    <div class="container">
+        <h2 class="section-title">How It Works</h2>
+        <p class="section-subtitle">Get from CV upload to actionable insights in three simple steps.</p>
+        
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="card-hireiq text-center">
+                    <div class="step-number">1</div>
+                    <h3 class="h4 mb-3">Upload CV</h3>
+                    <p class="text-muted">Upload one or more CVs and provide job requirements to get started with the analysis.</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card-hireiq text-center">
+                    <div class="step-number">2</div>
+                    <h3 class="h4 mb-3">AI Evaluation</h3>
+                    <p class="text-muted">The system matches and scores CVs using advanced NLP algorithms and keyword analysis.</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card-hireiq text-center">
+                    <div class="step-number">3</div>
+                    <h3 class="h4 mb-3">Get Insights</h3>
+                    <p class="text-muted">See ranking, skill gaps, and improvement suggestions instantly with detailed reports.</p>
+                </div>
+            </div>
+        </div>
     </div>
-  </div>
 </section>
 
 <!-- Features -->
-<section class="section">
-  <div class="container">
-    <h2 class="section-title">Key Features</h2>
-    <p class="section-subtitle">Everything you need to streamline your recruitment or job search process.</p>
-    <div class="grid grid-3">
-      <div class="card">
-        <div class="feature-icon">📄</div>
-        <h3 class="feature-title">Resume Parsing</h3>
-        <p class="feature-desc">Automatically extract structured candidate information from uploaded CVs for easy review.</p>
-      </div>
-      <div class="card">
-        <div class="feature-icon">📥</div>
-        <h3 class="feature-title">Bulk Upload & Export</h3>
-        <p class="feature-desc">Upload multiple resumes at once and export ranking results as CSV or Excel files.</p>
-      </div>
-      <div class="card">
-        <div class="feature-icon">📈</div>
-        <h3 class="feature-title">Detailed Analytics</h3>
-        <p class="feature-desc">Get comprehensive scoring across contact info, experience, education, skills, and formatting.</p>
-      </div>
+<section class="section-hireiq">
+    <div class="container">
+        <h2 class="section-title">Key Features</h2>
+        <p class="section-subtitle">Everything you need to streamline your recruitment or job search process.</p>
+        
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="card-hireiq text-center">
+                    <div class="feature-icon">📄</div>
+                    <h3 class="h4 mb-3">Resume Parsing</h3>
+                    <p class="text-muted">Automatically extract structured candidate information from uploaded CVs for easy review.</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card-hireiq text-center">
+                    <div class="feature-icon">📥</div>
+                    <h3 class="h4 mb-3">Bulk Upload & Export</h3>
+                    <p class="text-muted">Upload multiple resumes at once and export ranking results as CSV or Excel files.</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card-hireiq text-center">
+                    <div class="feature-icon">📈</div>
+                    <h3 class="h4 mb-3">Detailed Analytics</h3>
+                    <p class="text-muted">Get comprehensive scoring across contact info, experience, education, skills, and formatting.</p>
+                </div>
+            </div>
+        </div>
     </div>
-  </div>
 </section>
 
 <!-- FAQ -->
-<section class="section bg-light">
-  <div class="container">
-    <h2 class="section-title">Frequently Asked Questions</h2>
-    <p class="section-subtitle">Everything you need to know about CV Analyzer and how it can transform your hiring process.</p>
-    
-    <div class="faq-item">
-      <div class="faq-question" onclick="toggleFAQ(this)">
-        What is CV Analyzer?
-        <i class="fas fa-chevron-down"></i>
-      </div>
-      <div class="faq-answer hidden">
-        CV Analyzer is an AI-powered platform that analyzes and ranks CVs based on how well they match a specific job description. It helps recruiters make faster and smarter hiring decisions by providing detailed compatibility scores and insights.
-      </div>
+<section class="section-hireiq bg-light">
+    <div class="container">
+        <h2 class="section-title">Frequently Asked Questions</h2>
+        <p class="section-subtitle">Everything you need to know about CV Analyzer and how it can transform your hiring process.</p>
+        
+        <div class="accordion" id="faqAccordion">
+            <div class="accordion-item">
+                <h2 class="accordion-header">
+                    <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#faq1">
+                        What is CV Analyzer?
+                    </button>
+                </h2>
+                <div id="faq1" class="accordion-collapse collapse show" data-bs-parent="#faqAccordion">
+                    <div class="accordion-body">
+                        CV Analyzer is an AI-powered platform that analyzes and ranks CVs based on how well they match a specific job description. It helps recruiters make faster and smarter hiring decisions by providing detailed compatibility scores and insights.
+                    </div>
+                </div>
+            </div>
+            
+            <div class="accordion-item">
+                <h2 class="accordion-header">
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq2">
+                        How does CV Analyzer work?
+                    </button>
+                </h2>
+                <div id="faq2" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                    <div class="accordion-body">
+                        Simply upload one or more CVs along with a job description. Our system uses advanced Natural Language Processing (NLP) algorithms to evaluate each CV and provide compatibility scores, detailed skill matching analysis, gap identification, and actionable insights for improvement.
+                    </div>
+                </div>
+            </div>
+            
+            <div class="accordion-item">
+                <h2 class="accordion-header">
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq3">
+                        What file formats are supported?
+                    </button>
+                </h2>
+                <div id="faq3" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                    <div class="accordion-body">
+                        You can upload CVs in commonly used formats such as PDF, DOC, DOCX, or TXT. Our system supports multiple file formats to ensure maximum compatibility and ease of use.
+                    </div>
+                </div>
+            </div>
+            
+            <div class="accordion-item">
+                <h2 class="accordion-header">
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq4">
+                        Can I upload multiple CVs at once?
+                    </button>
+                </h2>
+                <div id="faq4" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                    <div class="accordion-body">
+                        Absolutely! You can upload multiple CVs against a single job description to compare and rank candidates more efficiently. This feature is perfect for recruiters managing large candidate pools.
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
-    
-    <div class="faq-item">
-      <div class="faq-question" onclick="toggleFAQ(this)">
-        How does CV Analyzer work?
-        <i class="fas fa-chevron-down"></i>
-      </div>
-      <div class="faq-answer hidden">
-        Simply upload one or more CVs along with a job description. Our system uses advanced Natural Language Processing (NLP) algorithms to evaluate each CV and provide compatibility scores, detailed skill matching analysis, gap identification, and actionable insights for improvement.
-      </div>
-    </div>
-    
-    <div class="faq-item">
-      <div class="faq-question" onclick="toggleFAQ(this)">
-        What file formats are supported?
-        <i class="fas fa-chevron-down"></i>
-      </div>
-      <div class="faq-answer hidden">
-        You can upload CVs in commonly used formats such as PDF, DOC, DOCX, or TXT. Our system supports multiple file formats to ensure maximum compatibility and ease of use.
-      </div>
-    </div>
-    
-    <div class="faq-item">
-      <div class="faq-question" onclick="toggleFAQ(this)">
-        Can I upload multiple CVs at once?
-        <i class="fas fa-chevron-down"></i>
-      </div>
-      <div class="faq-answer hidden">
-        Absolutely! You can upload multiple CVs against a single job description to compare and rank candidates more efficiently. This feature is perfect for recruiters managing large candidate pools.
-      </div>
-    </div>
-  </div>
 </section>
-
-<!-- Footer -->
-<footer>
-  <div class="container">
-    <div class="footer-links">
-      <div>
-        <div class="footer-title">Product</div>
-        <a href="{% url 'upload' %}" class="footer-link">CV Matching</a>
-        <a href="{% url 'upload_and_suggest' %}" class="footer-link">CV Suggestions</a>
-        <a href="#" class="footer-link">Features</a>
-        <a href="#" class="footer-link">Pricing</a>
-      </div>
-      <div>
-        <div class="footer-title">Company</div>
-        <a href="#" class="footer-link">About</a>
-        <a href="#" class="footer-link">Blog</a>
-        <a href="#" class="footer-link">Careers</a>
-        <a href="#" class="footer-link">Contact</a>
-      </div>
-      <div>
-        <div class="footer-title">Resources</div>
-        <a href="#" class="footer-link">Help Center</a>
-        <a href="#" class="footer-link">API Documentation</a>
-        <a href="#" class="footer-link">Community</a>
-        <a href="#" class="footer-link">Privacy Policy</a>
-      </div>
-      <div>
-        <div class="footer-title">Connect</div>
-        <a href="#" class="footer-link">Twitter</a>
-        <a href="#" class="footer-link">LinkedIn</a>
-        <a href="#" class="footer-link">GitHub</a>
-        <a href="#" class="footer-link">YouTube</a>
-      </div>
-    </div>
-    <div class="copyright">
-      &copy; 2023 CV Analyzer. All rights reserved.
-    </div>
-  </div>
-</footer>
-{% endblock %}
-
-{% block extra_js %}
-<script>
-  // FAQ toggle function
-  function toggleFAQ(element) {
-    const answer = element.nextElementSibling;
-    const icon = element.querySelector('i');
-    
-    answer.classList.toggle('hidden');
-    
-    if (answer.classList.contains('hidden')) {
-      icon.style.transform = 'rotate(0deg)';
-    } else {
-      icon.style.transform = 'rotate(180deg)';
-    }
-  }
-</script>
 {% endblock %}
