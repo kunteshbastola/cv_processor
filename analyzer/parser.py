@@ -2,10 +2,10 @@ import PyPDF2
 import docx
 import re
 from typing import Dict, List, Optional
+import os
 import logging
 
 logger = logging.getLogger(__name__)
-
 
 class CVParser:
     def __init__(self):
@@ -42,6 +42,9 @@ class CVParser:
     # --------------------------------------------------
 
     def extract_text_from_pdf(self, file_path: str) -> str:
+        if not os.path.exists(file_path):
+            return f"Error: file not found - {file_path}"
+
         try:
             with open(file_path, "rb") as f:
                 reader = PyPDF2.PdfReader(f)
@@ -64,6 +67,9 @@ class CVParser:
             return f"Error reading PDF: {e}"
 
     def extract_text_from_docx(self, file_path: str) -> str:
+        if not os.path.exists(file_path):
+            return f"Error: file not found - {file_path}"
+
         try:
             doc = docx.Document(file_path)
             text = ""
@@ -84,6 +90,9 @@ class CVParser:
             return f"Error reading DOCX: {e}"
 
     def extract_text_from_txt(self, file_path: str) -> str:
+        if not os.path.exists(file_path):
+            return f"Error: file not found - {file_path}"
+
         for encoding in ["utf-8", "utf-16", "latin-1", "cp1252"]:
             try:
                 with open(file_path, "r", encoding=encoding) as f:
@@ -96,6 +105,7 @@ class CVParser:
         return "Error reading TXT file"
 
     def extract_text(self, file_path: str, extension: str) -> str:
+        extension = extension.lower()
         if extension == ".pdf":
             return self.extract_text_from_pdf(file_path)
         if extension in [".doc", ".docx"]:
@@ -109,6 +119,9 @@ class CVParser:
     # --------------------------------------------------
 
     def extract_contact_info(self, text: str) -> str:
+        if not text or text.startswith("Error"):
+            return "Extraction failed"
+
         matches = []
         for pattern in self.contact_patterns:
             matches.extend(re.findall(pattern, text, re.IGNORECASE))
@@ -121,6 +134,9 @@ class CVParser:
         section_name: str,
         max_lines: int
     ) -> str:
+        if not text or text.startswith("Error"):
+            return f"No {section_name} section found"
+
         lines = [l.strip() for l in text.split("\n") if l.strip()]
         capture = False
         section_lines = []
@@ -132,7 +148,7 @@ class CVParser:
                 capture = True
                 continue
 
-            if capture and lower in self.stop_sections.get(section_name.lower(), []):
+            if capture and any(stop in lower for stop in self.stop_sections.get(section_name.lower(), [])):
                 break
 
             if capture:
@@ -191,10 +207,15 @@ class CVParser:
         score = 0
         details = []
 
+        if not parsed_cv:
+            return {"score": 0, "details": ["Parsing failed"]}
+
         raw_text = parsed_cv.get("raw_text", "").lower()
         exp_text = parsed_cv.get("experience", "").lower()
         edu_text = parsed_cv.get("education", "").lower()
         skills_text = parsed_cv.get("skills", "").lower()
+
+        required_skills = required_skills or []
 
         # -------- Job Name Matching --------
         if job_name:
@@ -208,7 +229,6 @@ class CVParser:
         # -------- Experience Matching --------
         if required_experience:
             years = []
-
             duration_matches = re.findall(
                 r'(\d+)\s*(?:\+)?(?:-|to)?\s*(\d+)?\s*(?:years|yrs|year)',
                 exp_text
@@ -227,7 +247,6 @@ class CVParser:
                 years.append(max(0, int(end) - int(start)))
 
             max_years = max(years) if years else 0
-
             if max_years >= required_experience:
                 score += 20
                 details.append(f"Experience OK ({max_years} yrs)")
@@ -244,10 +263,8 @@ class CVParser:
 
             req = required_education.lower()
             matched = any(
-                s in edu_text
-                for k, v in education_map.items()
-                if req in v
-                for s in v
+                any(term in edu_text for term in terms)
+                for key, terms in education_map.items() if key == req
             )
 
             if matched:
