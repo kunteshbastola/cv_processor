@@ -27,10 +27,9 @@ class CVUploadAdmin(admin.ModelAdmin):
     )
 
     def display_filename(self, obj):
-        return os.path.basename(obj.file.name)
-
-    display_filename.short_description = "File Name"
-
+        if obj.file:
+            return os.path.basename(obj.file.name)
+        return "(no file)"
 
 # Register Token model to view tokens in admin
 admin.site.register(Token)

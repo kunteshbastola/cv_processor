@@ -1,5 +1,6 @@
 import re
 from typing import Dict, List, Tuple, Optional
+from utiliy.keyword import KEYWORDS
 
 
 
@@ -235,7 +236,7 @@ class CVScorer:
         resume_text = resume_text.lower()
 
         relevant_skills = []
-        for key, skills in JOB_KEYWORDS.items():
+        for key, skills in KEYWORDS.items():
             if job_tokens & set(key.split()):
                 relevant_skills = skills
                 break
