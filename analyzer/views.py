@@ -14,7 +14,8 @@ from .models import CVUpload
 from .forms import CVUploadForm
 from .parser import CVParser
 from .cv_scorer import CVScorer
-from utiliy.suggestions import generate_resume_suggestions
+from utiliy.suggestions import generate_job_keyword_suggestions
+
 
 logger = logging.getLogger(__name__)
 
@@ -219,9 +220,10 @@ def upload_and_suggest(request):
             # Generate suggestions safely
             resume_text = cv_upload.raw_text
             try:
-                job_suggestions = generate_resume_suggestions(resume_text, job_name)
+                job_suggestions = generate_job_keyword_suggestions(resume_text, job_name)
             except Exception:
-                job_suggestions = ""
+                job_suggestions = ["Could not generate job-specific keyword suggestions."]
+
 
             default_suggestions_list = scoring_results.get('suggestions', [])
             default_suggestions = "\n".join(default_suggestions_list) if isinstance(default_suggestions_list, list) else str(default_suggestions_list or "")
