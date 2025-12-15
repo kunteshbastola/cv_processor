@@ -180,10 +180,11 @@ def upload_and_suggest(request):
             return render(request, "analyzer/upload_and_suggest.html")
 
         file_ext = os.path.splitext(file.name)[1].lower()
-        if file_ext not in ['.pdf','.doc','.docx','.txt']:
+        if file_ext not in ['.pdf', '.doc', '.docx', '.txt']:
             messages.error(request, "Unsupported file format.")
             return render(request, "analyzer/upload_and_suggest.html")
 
+        # Save uploaded CV
         cv_upload = CVUpload(user=request.user, file=file, target_job_role=job_name)
         cv_upload.save()
 
@@ -191,11 +192,12 @@ def upload_and_suggest(request):
             parser = CVParser()
             scorer = CVScorer()
 
-            with default_storage.open(cv_upload.file.name, 'rb') as f:
-                parsed_data = parser.parse_cv(f, file_ext)
+            # Pass the actual file path to the parser
+            file_path = cv_upload.file.path
+            parsed_data = parser.parse_cv(file_path, file_ext)
 
             # Generate job-specific suggestions
-            suggestions = generate_job_keyword_suggestions(parsed_data.get("raw_text",""), job_name)
+            suggestions = generate_job_keyword_suggestions(parsed_data.get("raw_text", ""), job_name)
 
             # Save CV info
             cv_upload.raw_text = parsed_data.get("raw_text", "")
@@ -207,6 +209,7 @@ def upload_and_suggest(request):
             messages.error(request, f"Error processing CV: {e}")
 
     return render(request, "analyzer/upload_and_suggest.html", {"suggestions": suggestions})
+
 
 
 

@@ -156,13 +156,10 @@ SOCIALACCOUNT_PROVIDERS = {
 }
 
 
-# Static files (CSS, JavaScript, Images)
 STATIC_URL = '/static/'
-STATICFILES_DIRS = [
-    BASE_DIR / "static",  # if you have a global static folder
-]
-STATIC_ROOT = BASE_DIR / "staticfiles"  # for collectstatic
-
+STATICFILES_DIRS = [BASE_DIR / "static"]  # optional, for global static folder
+STATIC_ROOT = BASE_DIR / "staticfiles"    # for collectstatic
+STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
 
 # Password validation
