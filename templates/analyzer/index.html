@@ -3,15 +3,7 @@
 
 {% block title %}Home - CV Analyzer{% endblock %}
 
-{% block content %}
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>CV Analyzer - AI-Powered Resume Ranking System</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+{% block extra_css %}
 <style>
   :root {
     --primary: #3b82f6;
@@ -22,25 +14,6 @@
     --light: #f9fafb;
     --gray: #6b7280;
     --light-gray: #e5e7eb;
-  }
-  
-  * {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-  }
-  
-  body {
-    font-family: 'Inter', sans-serif;
-    color: var(--dark);
-    line-height: 1.6;
-    background-color: #ffffff;
-  }
-  
-  .container {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 0 1.5rem;
   }
   
   .section {
@@ -87,17 +60,6 @@
     background-color: var(--primary-dark);
     transform: translateY(-2px);
     box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
-  }
-  
-  .btn-secondary {
-    background-color: white;
-    color: var(--primary);
-    border: 2px solid var(--primary);
-  }
-  
-  .btn-secondary:hover {
-    background-color: var(--primary);
-    color: white;
   }
   
   .btn-success {
@@ -234,72 +196,6 @@
     display: none;
   }
   
-  .back-link {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
-    color: var(--primary);
-    font-weight: 500;
-    margin-bottom: 1.5rem;
-    cursor: pointer;
-    text-decoration: none;
-  }
-  
-  .back-link:hover {
-    color: var(--primary-dark);
-  }
-  
-  .score-bar {
-    width: 100%;
-    background: var(--light-gray);
-    height: 1rem;
-    border-radius: 0.5rem;
-    overflow: hidden;
-    margin-bottom: 1rem;
-  }
-  
-  .score-fill {
-    height: 100%;
-    border-radius: 0.5rem;
-  }
-  
-  .score-blue { background: var(--primary); }
-  .score-green { background: var(--secondary); }
-  .score-yellow { background: #facc15; }
-  
-  .suggestion {
-    display: flex;
-    align-items: flex-start;
-    gap: 0.75rem;
-    background: #f0f9ff;
-    padding: 1rem;
-    border-radius: 0.5rem;
-    margin-bottom: 0.75rem;
-    border-left: 4px solid var(--primary);
-  }
-  
-  input, select, textarea {
-    width: 100%;
-    padding: 0.875rem;
-    border: 2px solid var(--light-gray);
-    border-radius: 0.5rem;
-    font-family: 'Inter', sans-serif;
-    font-size: 1rem;
-    transition: border-color 0.3s;
-    margin-bottom: 1.25rem;
-  }
-  
-  input:focus, select:focus, textarea:focus {
-    outline: none;
-    border-color: var(--primary);
-  }
-  
-  label {
-    display: block;
-    font-weight: 500;
-    margin-bottom: 0.5rem;
-  }
-  
   .hero {
     padding: 6rem 0 5rem;
     text-align: center;
@@ -330,14 +226,17 @@
     margin-bottom: 3rem;
   }
   
-  .nav {
+  .nav-custom {
     display: flex;
     justify-content: space-between;
     align-items: center;
     padding: 1.5rem 0;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 1.5rem 1.5rem;
   }
   
-  .logo {
+  .logo-custom {
     font-size: 1.5rem;
     font-weight: 700;
     color: var(--dark);
@@ -347,20 +246,20 @@
     gap: 0.5rem;
   }
   
-  .nav-links {
+  .nav-links-custom {
     display: flex;
     gap: 2rem;
     align-items: center;
   }
   
-  .nav-link {
+  .nav-link-custom {
     color: var(--gray);
     text-decoration: none;
     font-weight: 500;
     transition: color 0.3s;
   }
   
-  .nav-link:hover {
+  .nav-link-custom:hover {
     color: var(--primary);
   }
   
@@ -375,6 +274,9 @@
     grid-template-columns: repeat(4, 1fr);
     gap: 2rem;
     margin-bottom: 3rem;
+    max-width: 1200px;
+    margin: 0 auto 3rem;
+    padding: 0 1.5rem;
   }
   
   .footer-title {
@@ -400,6 +302,9 @@
     border-top: 1px solid #374151;
     color: #9ca3af;
     font-size: 0.875rem;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem 1.5rem 0;
   }
   
   @media (max-width: 768px) {
@@ -416,7 +321,7 @@
       align-items: center;
     }
     
-    .nav-links {
+    .nav-links-custom {
       display: none;
     }
     
@@ -425,22 +330,9 @@
     }
   }
 </style>
-</head>
-<body>
+{% endblock %}
 
-<!-- Navigation -->
-<nav class="nav container">
-  <a href="/" class="logo">
-    <i class="fas fa-file-alt"></i> CV Analyzer
-  </a>
-  <div class="nav-links">
-    <a href="/" class="nav-link">Home</a>
-    <a href="{% url 'upload' %}" class="nav-link">CV Matching</a>
-    <a href="{% url 'upload_and_suggest' %}" class="nav-link">CV Suggestions</a>
-    <!-- Removed Sign In button -->
-  </div>
-</nav>
-
+{% block content %}
 <!-- Hero Section -->
 <section class="hero">
   <div class="container">
@@ -632,7 +524,9 @@
     </div>
   </div>
 </footer>
+{% endblock %}
 
+{% block extra_js %}
 <script>
   // FAQ toggle function
   function toggleFAQ(element) {
@@ -648,7 +542,4 @@
     }
   }
 </script>
-
-</body>
-</html>
 {% endblock %}
