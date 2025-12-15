@@ -58,7 +58,7 @@ def upload(request):
 
                 try:
                     # Parse CV content
-                    parsed_data = parser.parse_cv(cv_upload.file, file_ext)
+                    parsed_data = parser.parse_cv(cv_upload.file.path, file_ext)
 
                     # Score CV
                     scoring_results = scorer.score_cv(parsed_data, job_name)
