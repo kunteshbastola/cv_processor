@@ -112,7 +112,7 @@ WSGI_APPLICATION = 'cv_processor.wsgi.application'
 
 
 # Set debug to False in production
-DEBUG = 'True'
+DEBUG = os.getenv('DEBUG', 'True') == 'True'
 
 
 
@@ -196,17 +196,6 @@ USE_TZ = True
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
-
-# REST FRAMEWORK
-REST_FRAMEWORK = {
-    'DEFAULT_PERMISSION_CLASSES': [
-        'rest_framework.permissions.IsAuthenticated',
-    ],
-    'DEFAULT_AUTHENTICATION_CLASSES': [
-        'rest_framework.authentication.SessionAuthentication',
-        'rest_framework.authentication.TokenAuthentication',
-    ],
-}
 
 ALLOWED_HOSTS = [
     'localhost',

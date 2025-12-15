@@ -2,84 +2,75 @@ import PyPDF2
 import docx
 import re
 from typing import Dict, List, Optional
-import nltk
 import logging
 
-# Setup logging
 logger = logging.getLogger(__name__)
-
-# Download NLTK punkt tokenizer if not already available
-try:
-    nltk.data.find('tokenizers/punkt')
-except LookupError:
-    try:
-        nltk.download('punkt')
-    except Exception as e:
-        logger.warning(f"Could not download NLTK punkt data: {e}")
 
 
 class CVParser:
     def __init__(self):
+        # ---------------- CONTACT PATTERNS ----------------
         self.contact_patterns = [
-            r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b',  # Email
-            r'\b\d{3}[-.]?\d{3}[-.]?\d{4}\b',  # Phone (US format)
-            r'\b(?:\+\d{1,3}\s?)?\(?\d{3}\)?[-.\s]?\d{3}[-.\s]?\d{4}\b',  # International phone
-            r'\+\d{1,3}[-.\s]?\d{1,4}[-.\s]?\d{1,4}[-.\s]?\d{1,9}',  # Flexible international
-            r'\b\d{10,15}\b'  # Digit-only phone numbers
+            r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}\b',
+            r'(?:\+\d{1,3}\s?)?\(?\d{3}\)?[-.\s]?\d{3}[-.\s]?\d{4}',
+            r'\+\d{1,3}[-.\s]?\d{1,4}[-.\s]?\d{1,4}[-.\s]?\d{1,9}',
+            r'\b\d{10,15}\b'
         ]
 
-        # Keywords for section detection
+        # ---------------- SECTION KEYWORDS ----------------
         self.experience_keywords = [
-            'experience', 'work history', 'employment', 'career', 'work experience',
-            'professional experience', 'employment history', 'professional background',
-            'work', 'job', 'position', 'role'
+            'experience', 'work experience', 'employment',
+            'professional experience', 'career', 'work history'
         ]
         self.education_keywords = [
-            'education', 'academic', 'qualification', 'degree', 'university', 'college',
-            'school', 'certification', 'academic background', 'learning', 'studies'
+            'education', 'academic', 'degree', 'university',
+            'college', 'qualification', 'certification'
         ]
         self.skills_keywords = [
-            'skills', 'technical skills', 'competencies', 'abilities', 'technologies',
-            'tools', 'expertise', 'proficiencies', 'technical competencies',
-            'programming', 'software', 'languages'
+            'skills', 'technical skills', 'competencies',
+            'technologies', 'tools', 'expertise'
         ]
 
-    # ------------ TEXT EXTRACTION ------------ #
+        self.stop_sections = {
+            'experience': ['education', 'skills', 'projects', 'certifications'],
+            'education': ['experience', 'skills', 'projects'],
+            'skills': ['experience', 'education', 'projects']
+        }
+
+    # --------------------------------------------------
+    # TEXT EXTRACTION
+    # --------------------------------------------------
 
     def extract_text_from_pdf(self, file_path: str) -> str:
         try:
-            with open(file_path, 'rb') as file:
-                reader = PyPDF2.PdfReader(file)
+            with open(file_path, "rb") as f:
+                reader = PyPDF2.PdfReader(f)
                 text = ""
 
                 if reader.is_encrypted:
                     try:
                         reader.decrypt("")
-                    except:
+                    except Exception:
                         return "Error: PDF is password protected"
 
-                for page_num, page in enumerate(reader.pages):
-                    try:
-                        page_text = page.extract_text()
-                        if page_text and page_text.strip():
-                            text += page_text + "\n"
-                    except Exception as e:
-                        logger.warning(f"Error reading page {page_num}: {e}")
-                        continue
+                for page in reader.pages:
+                    page_text = page.extract_text()
+                    if page_text:
+                        text += page_text + "\n"
 
-                return text.strip() if text.strip() else "No readable text found in PDF"
+                return text.strip() or "No readable text found in PDF"
         except Exception as e:
-            logger.error(f"Error reading PDF {file_path}: {e}")
-            return f"Error reading PDF: {str(e)}"
+            logger.error(f"PDF read error: {e}")
+            return f"Error reading PDF: {e}"
 
     def extract_text_from_docx(self, file_path: str) -> str:
         try:
             doc = docx.Document(file_path)
             text = ""
 
-            for paragraph in doc.paragraphs:
-                if paragraph.text.strip():
-                    text += paragraph.text + "\n"
+            for p in doc.paragraphs:
+                if p.text.strip():
+                    text += p.text + "\n"
 
             for table in doc.tables:
                 for row in table.rows:
@@ -87,193 +78,194 @@ class CVParser:
                         if cell.text.strip():
                             text += cell.text + "\n"
 
-            return text.strip() if text.strip() else "No readable text found in document"
+            return text.strip() or "No readable text found in DOCX"
         except Exception as e:
-            logger.error(f"Error reading DOCX {file_path}: {e}")
-            return f"Error reading DOCX: {str(e)}"
+            logger.error(f"DOCX read error: {e}")
+            return f"Error reading DOCX: {e}"
 
     def extract_text_from_txt(self, file_path: str) -> str:
-        encodings = ['utf-8', 'utf-16', 'latin-1', 'cp1252']
-        for encoding in encodings:
+        for encoding in ["utf-8", "utf-16", "latin-1", "cp1252"]:
             try:
-                with open(file_path, 'r', encoding=encoding) as file:
-                    content = file.read()
-                    return content.strip() if content.strip() else "Empty text file"
+                with open(file_path, "r", encoding=encoding) as f:
+                    text = f.read()
+                    return text.strip() or "Empty text file"
             except UnicodeDecodeError:
                 continue
             except Exception as e:
-                logger.error(f"Error reading TXT {file_path} with {encoding}: {e}")
-                continue
-        return "Error: Could not decode text file with any supported encoding"
+                logger.error(f"TXT read error: {e}")
+        return "Error reading TXT file"
 
-    def extract_text(self, file_path: str, file_extension: str) -> str:
-        file_extension = file_extension.lower()
-        if file_extension == '.pdf':
+    def extract_text(self, file_path: str, extension: str) -> str:
+        if extension == ".pdf":
             return self.extract_text_from_pdf(file_path)
-        elif file_extension in ['.doc', '.docx']:
+        if extension in [".doc", ".docx"]:
             return self.extract_text_from_docx(file_path)
-        elif file_extension == '.txt':
+        if extension == ".txt":
             return self.extract_text_from_txt(file_path)
-        else:
-            return f"Unsupported file format: {file_extension}"
+        return f"Unsupported file format: {extension}"
 
-    # ------------ SECTION EXTRACTION ------------ #
+    # --------------------------------------------------
+    # SECTION EXTRACTION
+    # --------------------------------------------------
 
     def extract_contact_info(self, text: str) -> str:
-        contacts = []
+        matches = []
         for pattern in self.contact_patterns:
-            matches = re.findall(pattern, text, re.IGNORECASE | re.MULTILINE)
-            contacts.extend(matches)
-        unique_contacts = list(set(contacts))
-        filtered_contacts = [c.strip() for c in unique_contacts if 3 <= len(c.strip()) <= 50]
-        return "; ".join(filtered_contacts) if filtered_contacts else "No contact information found"
+            matches.extend(re.findall(pattern, text, re.IGNORECASE))
+        return "; ".join(sorted(set(matches))) or "No contact information found"
 
-    def extract_section(self, text: str, keywords: List[str], section_name: str, max_lines: int = 10) -> str:
-        lines = [line.strip() for line in text.split('\n') if line.strip()]
-        section_lines, capture, keywords_found = [], False, False
-
-        stop_keywords = {
-            'experience': ['education', 'skills', 'awards', 'certifications', 'references'],
-            'education': ['experience', 'skills', 'awards', 'work', 'employment'],
-            'skills': ['experience', 'education', 'awards', 'work', 'employment']
-        }
-        current_stop_words = stop_keywords.get(section_name.lower(), [])
+    def extract_section(
+        self,
+        text: str,
+        keywords: List[str],
+        section_name: str,
+        max_lines: int
+    ) -> str:
+        lines = [l.strip() for l in text.split("\n") if l.strip()]
+        capture = False
+        section_lines = []
 
         for line in lines:
-            line_lower = line.lower()
-            if any(keyword in line_lower for keyword in keywords):
-                capture, keywords_found = True, True
-                section_lines.append(line)
+            lower = line.lower()
+
+            if any(k in lower for k in keywords):
+                capture = True
                 continue
-            if capture and any(stop_word in line_lower for stop_word in current_stop_words):
-                if len(line) < 50 and (line.isupper() or line.istitle()):
-                    break
-            if capture and line and len(line) > 2:
+
+            if capture and lower in self.stop_sections.get(section_name.lower(), []):
+                break
+
+            if capture:
                 section_lines.append(line)
                 if len(section_lines) >= max_lines:
                     break
 
-        if not keywords_found:
-            return f"No {section_name.lower()} section found"
-        return '\n'.join(section_lines) if section_lines else f"No {section_name.lower()} content found"
+        return "\n".join(section_lines) or f"No {section_name} section found"
 
     def extract_experience(self, text: str) -> str:
-        return self.extract_section(text, self.experience_keywords, 'Experience', max_lines=15)
+        return self.extract_section(text, self.experience_keywords, "experience", 15)
 
     def extract_education(self, text: str) -> str:
-        return self.extract_section(text, self.education_keywords, 'Education', max_lines=10)
+        return self.extract_section(text, self.education_keywords, "education", 10)
 
     def extract_skills(self, text: str) -> str:
-        return self.extract_section(text, self.skills_keywords, 'Skills', max_lines=8)
+        return self.extract_section(text, self.skills_keywords, "skills", 8)
 
-    # ------------ MAIN PARSER ------------ #
+    # --------------------------------------------------
+    # MAIN PARSER
+    # --------------------------------------------------
 
-    def parse_cv(self, file_path: str, file_extension: str) -> Dict:
-        try:
-            raw_text = self.extract_text(file_path, file_extension)
-            if raw_text.startswith("Error:") or "Error reading" in raw_text:
-                return {
-                    'raw_text': raw_text,
-                    'contact_info': 'Could not extract',
-                    'experience': 'Could not extract',
-                    'education': 'Could not extract',
-                    'skills': 'Could not extract'
-                }
+    def parse_cv(self, file_path: str, extension: str) -> Dict:
+        raw_text = self.extract_text(file_path, extension)
+
+        if raw_text.startswith("Error"):
             return {
-                'raw_text': raw_text,
-                'contact_info': self.extract_contact_info(raw_text),
-                'experience': self.extract_experience(raw_text),
-                'education': self.extract_education(raw_text),
-                'skills': self.extract_skills(raw_text)
-            }
-        except Exception as e:
-            logger.error(f"Unexpected error parsing CV {file_path}: {e}")
-            return {
-                'raw_text': f'Unexpected error: {str(e)}',
-                'contact_info': 'Error during parsing',
-                'experience': 'Error during parsing',
-                'education': 'Error during parsing',
-                'skills': 'Error during parsing'
+                "raw_text": raw_text,
+                "contact_info": "Extraction failed",
+                "experience": "Extraction failed",
+                "education": "Extraction failed",
+                "skills": "Extraction failed",
             }
 
-    # ------------ MATCHING FUNCTION ------------ #
+        return {
+            "raw_text": raw_text,
+            "contact_info": self.extract_contact_info(raw_text),
+            "experience": self.extract_experience(raw_text),
+            "education": self.extract_education(raw_text),
+            "skills": self.extract_skills(raw_text),
+        }
 
-    def match_with_criteria(self, parsed_cv: Dict, job_name: str = "",
-                        required_experience: Optional[int] = None,
-                        required_education: str = "",
-                        required_skills: Optional[List[str]] = None) -> Dict:
-        """
-        Matches a parsed CV against job criteria and returns a score and details.
-        """
-        score, details = 0, []
+    # --------------------------------------------------
+    # MATCHING FUNCTION
+    # --------------------------------------------------
 
-        raw_text = parsed_cv.get('raw_text', '').lower()
-        exp_text = parsed_cv.get('experience', '').lower()
-        edu_text = parsed_cv.get('education', '').lower()
-        skills_text = parsed_cv.get('skills', '').lower()
+    def match_with_criteria(
+        self,
+        parsed_cv: Dict,
+        job_name: str = "",
+        required_experience: Optional[int] = None,
+        required_education: str = "",
+        required_skills: Optional[List[str]] = None
+    ) -> Dict:
 
-    # --------- Job Name Matching ---------
+        score = 0
+        details = []
+
+        raw_text = parsed_cv.get("raw_text", "").lower()
+        exp_text = parsed_cv.get("experience", "").lower()
+        edu_text = parsed_cv.get("education", "").lower()
+        skills_text = parsed_cv.get("skills", "").lower()
+
+        # -------- Job Name Matching --------
         if job_name:
-            job_words = [w.strip() for w in job_name.lower().split() if w.strip()]
-            if all(word in raw_text for word in job_words):
+            job_words = job_name.lower().split()
+            if all(w in raw_text for w in job_words):
                 score += 20
                 details.append("Job title matched")
             else:
-                details.append("Job title not fully matched")
+                details.append("Job title not matched")
 
-    # --------- Experience Matching ---------
+        # -------- Experience Matching --------
         if required_experience:
             years = []
 
-        # Match "X years", "X-Y yrs", "X+ yrs"
-            duration_matches = re.findall(r'(\d+)\s*(?:\+)?(?:-|to)?\s*(\d+)?\s*(?:years|yrs|year)', exp_text)
+            duration_matches = re.findall(
+                r'(\d+)\s*(?:\+)?(?:-|to)?\s*(\d+)?\s*(?:years|yrs|year)',
+                exp_text
+            )
             for y1, y2 in duration_matches:
-                if y1 and y1.isdigit(): years.append(int(y1))
-                if y2 and y2.isdigit(): years.append(int(y2))
+                if y1.isdigit():
+                    years.append(int(y1))
+                if y2 and y2.isdigit():
+                    years.append(int(y2))
 
-            # Match year ranges like 2020-2023 or 2019 - 2021
-            year_ranges = re.findall(r'\b(19|20)\d{2}\s*[-–]\s*(19|20)\d{2}\b', exp_text)
+            year_ranges = re.findall(
+                r'\b((?:19|20)\d{2})\s*[-–]\s*((?:19|20)\d{2})\b',
+                exp_text
+            )
             for start, end in year_ranges:
-                start_year = int(start)
-                end_year = int(end)
-                if end_year >= start_year:
-                    years.append(end_year - start_year)  # Difference is experience
+                years.append(max(0, int(end) - int(start)))
 
             max_years = max(years) if years else 0
 
             if max_years >= required_experience:
                 score += 20
-                details.append(f"Experience OK ({max_years} yrs found)")
+                details.append(f"Experience OK ({max_years} yrs)")
             else:
-                details.append(f"Experience insufficient ({max_years} yrs found)")
+                details.append(f"Experience insufficient ({max_years} yrs)")
 
-    # --------- Education Matching ---------
+        # -------- Education Matching --------
         if required_education:
             education_map = {
-                "bachelor": ["bachelor", "b.sc", "bsc", "undergraduate"],
-                "master": ["master", "m.sc", "msc", "graduate"],
-                "phd": ["phd", "doctorate", "doctoral"]
+                "bachelor": ["bachelor", "bsc", "bs", "undergraduate"],
+                "master": ["master", "msc", "ms", "graduate"],
+                "phd": ["phd", "doctorate"]
             }
-            req_lower = required_education.lower()
-            matched = False
-            for key, synonyms in education_map.items():
-                if req_lower in synonyms:
-                    if any(s in edu_text for s in synonyms):
-                        matched = True
-                        break
+
+            req = required_education.lower()
+            matched = any(
+                s in edu_text
+                for k, v in education_map.items()
+                if req in v
+                for s in v
+            )
+
             if matched:
                 score += 20
                 details.append("Education matched")
             else:
                 details.append("Education not matched")
 
-    # --------- Skills Matching ---------
+        # -------- Skills Matching --------
         if required_skills:
-            # Normalize skills: split by comma, semicolon, or new line
-            cv_skills = re.split(r',|;|\n', skills_text)
-            cv_skills = [s.strip() for s in cv_skills if s.strip()]
+            cv_skills = re.split(r",|;|\n", skills_text)
+            cv_skills = [s.strip().lower() for s in cv_skills if s.strip()]
 
-            matched_skills = [s for s in required_skills if s.lower() in cv_skills]
+            matched_skills = [
+                s for s in required_skills
+                if any(s.lower() in cv for cv in cv_skills)
+            ]
+
             score += len(matched_skills) * 10
             if matched_skills:
                 details.append(f"Skills matched: {', '.join(matched_skills)}")
@@ -281,4 +273,3 @@ class CVParser:
                 details.append("No skills matched")
 
         return {"score": score, "details": details}
-

@@ -1,69 +1,89 @@
 from django import forms
 import os
 
+EDUCATION_CHOICES = [
+    ("bachelor", "Bachelor"),
+    ("master", "Master"),
+    ("phd", "PhD"),
+    ("diploma", "Diploma"),
+]
+
 class CVUploadForm(forms.Form):
     job_name = forms.CharField(
         max_length=100,
         required=True,
         label="Job Role",
         widget=forms.TextInput(attrs={
-            'class': 'form-control',
-            'placeholder': 'e.g. Data Analyst'
+            "class": "form-control",
+            "placeholder": "e.g. Data Analyst"
         })
     )
 
     required_experience = forms.IntegerField(
         required=False,
+        min_value=0,
         label="Minimum Years of Experience",
         widget=forms.NumberInput(attrs={
-            'class': 'form-control',
-            'placeholder': 'e.g. 2'
+            "class": "form-control",
+            "placeholder": "e.g. 2"
         })
     )
 
-    required_education = forms.CharField(
+    required_education = forms.ChoiceField(
         required=False,
+        choices=EDUCATION_CHOICES,
         label="Required Education Level",
-        widget=forms.TextInput(attrs={
-            'class': 'form-control',
-            'placeholder': 'e.g. Bachelor, Master, PhD'
-        })
+        widget=forms.Select(attrs={"class": "form-control"})
     )
 
     required_skills = forms.CharField(
         required=False,
         label="Required Skills (comma-separated)",
         widget=forms.TextInput(attrs={
-            'class': 'form-control',
-            'placeholder': 'e.g. Python, Excel, SQL'
+            "class": "form-control",
+            "placeholder": "e.g. Python, Excel, SQL"
         })
     )
 
-    dummy = forms.CharField(
-        required=False,
-        widget=forms.HiddenInput()
-    )
+    # ---------------- CLEAN METHODS ----------------
+
+    def clean_required_skills(self):
+        skills = self.cleaned_data.get("required_skills", "")
+        if not skills:
+            return []
+
+        return [
+            s.strip().lower()
+            for s in skills.split(",")
+            if s.strip()
+        ]
+
+    # ---------------- FILE VALIDATION ----------------
 
     def validate_multiple_files(self, files):
         """
-        Call this in your view using:
-        form.validate_multiple_files(request.FILES.getlist('cv_files'))
+        Call in the view:
+        form.validate_multiple_files(request.FILES.getlist("cv_files"))
         """
         if not files:
-            raise forms.ValidationError('Please select at least one file.')
+            raise forms.ValidationError("Please upload at least one CV.")
 
-        allowed_extensions = ['.pdf', '.doc', '.docx', '.txt']
+        allowed_extensions = {".pdf", ".doc", ".docx", ".txt"}
         max_size = 5 * 1024 * 1024  # 5MB
+
         errors = []
 
         for file in files:
-            file_ext = os.path.splitext(file.name)[1].lower()
-            if file_ext not in allowed_extensions:
-                errors.append(f'File {file.name} has an unsupported format.')
-            if file.size == 0:
-                errors.append(f'File {file.name} is empty.')
+            ext = os.path.splitext(file.name)[1].lower()
+
+            if ext not in allowed_extensions:
+                errors.append(f"{file.name}: unsupported file format.")
+
+            if file.size <= 0:
+                errors.append(f"{file.name}: file is empty.")
+
             if file.size > max_size:
-                errors.append(f'File {file.name} exceeds the 5MB limit.')
+                errors.append(f"{file.name}: exceeds 5MB limit.")
 
         if errors:
             raise forms.ValidationError(errors)

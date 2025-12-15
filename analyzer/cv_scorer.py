@@ -1,169 +1,202 @@
 import re
 from typing import Dict, List, Tuple, Optional
 
-# Example JOB_KEYWORDS dictionary for reference
-JOB_KEYWORDS = {
-    'software engineer': ['python', 'java', 'git', 'sql', 'oop', 'algorithms'],
-    'data analyst': ['excel', 'sql', 'python', 'statistics', 'visualization'],
-    'machine learning engineer': ['python', 'tensorflow', 'pytorch', 'ml', 'data preprocessing']
-}
+
+
+# ------------------ SCORING CONSTANTS ------------------
+CONTACT_EMAIL_SCORE = 40
+CONTACT_PHONE_SCORE = 30
+CONTACT_LOCATION_SCORE = 20
+CONTACT_LINK_SCORE = 10
+
+EXPERIENCE_DETAIL_SCORE = 30
+EXPERIENCE_DATE_SCORE = 25
+EXPERIENCE_ACTION_SCORE = 25
+EXPERIENCE_METRIC_SCORE = 20
+
+EDU_DEGREE_SCORE = 40
+EDU_INSTITUTE_SCORE = 30
+EDU_YEAR_SCORE = 20
+EDU_HONORS_SCORE = 10
+
+SKILL_COUNT_MAX_SCORE = 40
+SKILL_TECH_SCORE = 30
+SKILL_SOFT_SCORE = 20
+SKILL_CATEGORY_SCORE = 10
+
 
 class CVScorer:
     def __init__(self):
-        self.max_score = 100
         self.weights = {
-            'contact': 0.15,
-            'experience': 0.35,
-            'education': 0.25,
-            'skills': 0.15,
-            'format': 0.10
+            "contact": 0.15,
+            "experience": 0.35,
+            "education": 0.25,
+            "skills": 0.15,
+            "format": 0.10
         }
 
-    # ----------- CONTACT INFO SCORING -----------
+    # --------------------------------------------------
+    # CONTACT INFO
+    # --------------------------------------------------
     def score_contact_info(self, contact_info: str, raw_text: str) -> Tuple[float, List[str]]:
         score = 0
         suggestions = []
 
-        email_pattern = r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b'
-        phone_patterns = [
-            r'\b\d{3}[-.]?\d{3}[-.]?\d{4}\b',
-            r'\b(?:\+\d{1,3}\s?)?\(?\d{3}\)?[-.\s]?\d{3}[-.\s]?\d{4}\b'
-        ]
-        location_keywords = ['address', 'city', 'state', 'country', 'location']
+        text = f"{contact_info}\n{raw_text}".lower()
 
-        if re.search(email_pattern, contact_info):
-            score += 40
-        else:
-            suggestions.append("Add a professional email address")
+        email_pattern = r"\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}\b"
+        phone_pattern = r"(?:\+\d{1,3}\s?)?\(?\d{3}\)?[-.\s]?\d{3}[-.\s]?\d{4}"
 
-        if any(re.search(p, contact_info) for p in phone_patterns):
-            score += 30
+        if re.search(email_pattern, text):
+            score += CONTACT_EMAIL_SCORE
         else:
-            suggestions.append("Include a phone number")
+            suggestions.append("Add a professional email address.")
 
-        if any(k in raw_text.lower() for k in location_keywords):
-            score += 20
+        if re.search(phone_pattern, text):
+            score += CONTACT_PHONE_SCORE
         else:
-            suggestions.append("Consider adding your location or city")
+            suggestions.append("Include a phone number.")
 
-        if 'linkedin' in raw_text.lower() or 'github' in raw_text.lower():
-            score += 10
+        if any(k in text for k in ["city", "country", "location", "address"]):
+            score += CONTACT_LOCATION_SCORE
         else:
-            suggestions.append("Add LinkedIn profile or other professional links")
+            suggestions.append("Add your location (city/country).")
+
+        if any(k in text for k in ["linkedin", "github", "portfolio"]):
+            score += CONTACT_LINK_SCORE
+        else:
+            suggestions.append("Add LinkedIn, GitHub, or portfolio links.")
 
         return min(score, 100), suggestions
 
-    # ----------- EXPERIENCE SCORING -----------
+    # --------------------------------------------------
+    # EXPERIENCE
+    # --------------------------------------------------
     def score_experience(self, experience: str) -> Tuple[float, List[str]]:
         score = 0
         suggestions = []
 
         if not experience.strip():
-            return 0, ["Add work experience section with job titles, companies, and dates"]
+            return 0, ["Add a work experience section with roles and achievements."]
 
-        lines = [line.strip() for line in experience.split('\n') if line.strip()]
-        if len(lines) >= 2:
-            score += 30
-        else:
-            suggestions.append("Provide more detailed work experience")
+        lines = [l.strip() for l in experience.split("\n") if l.strip()]
 
-        # Detect years (including ranges like 2022-2024)
-        year_patterns = [r'\b\d{4}\b', r'\b\d{4}\s*-\s*\d{4}\b']
-        if any(re.search(p, experience) for p in year_patterns):
-            score += 25
+        if len(lines) >= 3:
+            score += EXPERIENCE_DETAIL_SCORE
         else:
-            suggestions.append("Include employment dates (start/end dates)")
+            suggestions.append("Add more detailed bullet points to your experience.")
 
-        action_verbs = ['managed', 'developed', 'implemented', 'created', 'led', 'improved',
-                        'achieved', 'increased', 'decreased', 'streamlined', 'coordinated']
-        if any(verb in experience.lower() for verb in action_verbs):
-            score += 25
+        year_pattern = r"\b(19|20)\d{2}\b"
+        if any(re.search(year_pattern, line) for line in lines):
+            score += EXPERIENCE_DATE_SCORE
         else:
-            suggestions.append("Use strong action verbs to describe your accomplishments")
+            suggestions.append("Include employment dates for each role.")
 
-        number_patterns = [r'\b\d+%\b', r'\b\$\d+\b', r'\b\d+\s*(million|thousand|k)\b']
-        if any(re.search(p, experience, re.IGNORECASE) for p in number_patterns):
-            score += 20
+        action_verbs = [
+            "developed", "designed", "implemented", "managed",
+            "led", "optimized", "improved", "built", "created"
+        ]
+        if any(v in experience.lower() for v in action_verbs):
+            score += EXPERIENCE_ACTION_SCORE
         else:
-            suggestions.append("Include quantifiable achievements and results")
+            suggestions.append("Use strong action verbs to describe your work.")
+
+        metric_pattern = r"\b\d+%|\$\d+|\b\d+\s?(k|m|million|thousand)\b"
+        if re.search(metric_pattern, experience.lower()):
+            score += EXPERIENCE_METRIC_SCORE
+        else:
+            suggestions.append("Add measurable results (numbers, %, impact).")
 
         return min(score, 100), suggestions
 
-    # ----------- EDUCATION SCORING -----------
+    # --------------------------------------------------
+    # EDUCATION
+    # --------------------------------------------------
     def score_education(self, education: str) -> Tuple[float, List[str]]:
         score = 0
         suggestions = []
 
         if not education.strip():
-            return 0, ["Add education section with degree, institution, and graduation date"]
+            return 0, ["Add your education details."]
 
-        degree_keywords = ['bachelor', 'master', 'phd', 'doctorate', 'diploma', 'certificate',
-                           'degree', 'bs', 'ba', 'ms', 'ma', 'mba']
-        if any(k in education.lower() for k in degree_keywords):
-            score += 40
-        else:
-            suggestions.append("Specify your degree type (Bachelor's, Master's, etc.)")
+        text = education.lower()
 
-        if len(education.split('\n')) >= 2:
-            score += 30
+        degree_keywords = [
+            "bachelor", "master", "phd", "degree", "bs", "ba", "ms", "mba"
+        ]
+        if any(k in text for k in degree_keywords):
+            score += EDU_DEGREE_SCORE
         else:
-            suggestions.append("Include the name of your educational institution")
+            suggestions.append("Specify your degree type.")
 
-        if re.search(r'\b\d{4}\b', education):
-            score += 20
+        if len(education.split("\n")) >= 2:
+            score += EDU_INSTITUTE_SCORE
         else:
-            suggestions.append("Add graduation year or expected graduation date")
+            suggestions.append("Include institution name.")
 
-        gpa_patterns = [r'\bgpa\s*:?\s*\d+\.\d+\b', r'\b\d+\.\d+\s*gpa\b']
-        honors_keywords = ['magna cum laude', 'summa cum laude', 'cum laude', 'honors', 'dean\'s list']
-        if any(re.search(p, education, re.IGNORECASE) for p in gpa_patterns) or \
-           any(k in education.lower() for k in honors_keywords):
-            score += 10
+        if re.search(r"\b(19|20)\d{2}\b", text):
+            score += EDU_YEAR_SCORE
         else:
-            suggestions.append("Consider adding GPA (if 3.5+) or academic honors")
+            suggestions.append("Add graduation or expected graduation year.")
+
+        if any(k in text for k in ["gpa", "honors", "cum laude", "dean"]):
+            score += EDU_HONORS_SCORE
+        else:
+            suggestions.append("Add GPA or academic honors if strong.")
 
         return min(score, 100), suggestions
 
-    # ----------- SKILLS SCORING -----------
+    # --------------------------------------------------
+    # SKILLS
+    # --------------------------------------------------
     def score_skills(self, skills: str) -> Tuple[float, List[str]]:
         score = 0
         suggestions = []
 
         if not skills.strip():
-            return 0, ["Add a skills section with relevant technical and soft skills"]
+            return 0, ["Add a skills section."]
 
-        skill_count = len(re.findall(r'[,\n•\-\*]', skills)) + 1
-        if skill_count >= 8:
-            score += 40
-        elif skill_count >= 5:
+        skill_list = re.split(r"[,\n•\-*]+", skills)
+        skill_list = [s.strip().lower() for s in skill_list if s.strip()]
+        count = len(skill_list)
+
+        if count >= 8:
+            score += SKILL_COUNT_MAX_SCORE
+        elif count >= 5:
             score += 30
-        elif skill_count >= 3:
+        elif count >= 3:
             score += 20
         else:
-            suggestions.append("List more relevant skills (aim for 5-10 skills)")
+            suggestions.append("List at least 5–10 relevant skills.")
 
-        tech_keywords = ['python', 'java', 'javascript', 'sql', 'html', 'css', 'react',
-                         'programming', 'software', 'database', 'cloud', 'aws', 'azure']
-        if any(k in skills.lower() for k in tech_keywords):
-            score += 30
+        tech_keywords = [
+            "python", "java", "sql", "javascript", "tensorflow",
+            "pytorch", "aws", "react", "database"
+        ]
+        if any(s in skill_list for s in tech_keywords):
+            score += SKILL_TECH_SCORE
         else:
-            suggestions.append("Include relevant technical skills for your field")
+            suggestions.append("Add more technical skills relevant to your field.")
 
-        soft_keywords = ['communication', 'leadership', 'teamwork', 'problem solving',
-                         'analytical', 'creative', 'organized', 'detail-oriented']
-        if any(k in skills.lower() for k in soft_keywords):
-            score += 20
+        soft_keywords = [
+            "communication", "teamwork", "leadership",
+            "problem solving", "analytical"
+        ]
+        if any(s in skill_list for s in soft_keywords):
+            score += SKILL_SOFT_SCORE
         else:
-            suggestions.append("Add important soft skills like communication and teamwork")
+            suggestions.append("Add key soft skills.")
 
-        if 'technical' in skills.lower() or 'soft' in skills.lower() or ':' in skills:
-            score += 10
+        if ":" in skills or "technical" in skills.lower():
+            score += SKILL_CATEGORY_SCORE
         else:
-            suggestions.append("Consider organizing skills into categories (Technical, Soft Skills, etc.)")
+            suggestions.append("Group skills into categories (Technical / Soft).")
 
         return min(score, 100), suggestions
 
-    # ----------- FORMAT SCORING -----------
+    # --------------------------------------------------
+    # FORMAT
+    # --------------------------------------------------
     def score_format(self, raw_text: str) -> Tuple[float, List[str]]:
         score = 0
         suggestions = []
@@ -171,97 +204,89 @@ class CVScorer:
         word_count = len(raw_text.split())
         if 200 <= word_count <= 800:
             score += 30
-        elif word_count < 200:
-            suggestions.append("CV seems too short - aim for 1-2 pages")
         else:
-            suggestions.append("CV might be too long - keep it concise (1-2 pages)")
+            suggestions.append("Keep CV length between 1–2 pages.")
 
-        section_keywords = ['experience', 'education', 'skills', 'summary', 'objective']
-        section_count = sum(1 for k in section_keywords if k in raw_text.lower())
-        if section_count >= 4:
+        sections = ["experience", "education", "skills", "summary", "projects"]
+        if sum(1 for s in sections if s in raw_text.lower()) >= 4:
             score += 25
         else:
-            suggestions.append("Organize CV with clear section headers")
+            suggestions.append("Use clear section headers.")
 
-        lines = raw_text.split('\n')
-        non_empty_lines = [l for l in lines if l.strip()]
-        if len(non_empty_lines) > 10:
+        if len([l for l in raw_text.split("\n") if l.strip()]) > 12:
             score += 25
         else:
-            suggestions.append("Ensure proper formatting with clear structure")
+            suggestions.append("Improve spacing and structure.")
 
-        if any(c in raw_text for c in ['•', '-', '*', '|']):
+        if any(c in raw_text for c in ["•", "-", "*"]):
             score += 20
         else:
-            suggestions.append("Use bullet points to improve readability")
+            suggestions.append("Use bullet points for readability.")
 
         return min(score, 100), suggestions
 
-    # ----------- OVERALL SCORE -----------
-    def calculate_overall_score(self, scores: Dict[str, float]) -> float:
-        overall = sum(scores[key] * self.weights[key] for key in self.weights.keys())
-        return round(overall, 1)
-
-    # ----------- JOB-SPECIFIC SUGGESTIONS -----------
+    # --------------------------------------------------
+    # JOB MATCHING
+    # --------------------------------------------------
     @staticmethod
-    def generate_resume_suggestions(resume_text: str, job_name: str) -> str:
+    def job_match_suggestions(resume_text: str, job_name: str) -> List[str]:
         suggestions = []
-        job_name_lower = job_name.lower()
+        job_tokens = set(job_name.lower().split())
+        resume_text = resume_text.lower()
+
         relevant_skills = []
-        for key in JOB_KEYWORDS:
-            if key.lower() in job_name_lower:
-                relevant_skills = JOB_KEYWORDS[key]
+        for key, skills in JOB_KEYWORDS.items():
+            if job_tokens & set(key.split()):
+                relevant_skills = skills
                 break
 
-        resume_text_lower = resume_text.lower()
-        missing_skills = [s for s in relevant_skills if s.lower() not in resume_text_lower]
-        if missing_skills:
-            suggestions.append(f"Consider adding these relevant skills for {job_name}: {', '.join(missing_skills)}.")
+        missing = [s for s in relevant_skills if s not in resume_text]
+        if missing:
+            suggestions.append(
+                f"Add missing skills for {job_name}: {', '.join(missing)}."
+            )
 
-        if "project" not in resume_text_lower:
-            suggestions.append("Include details about projects you have worked on to demonstrate practical experience.")
-        if "experience" not in resume_text_lower:
-            suggestions.append("Add your work experience relevant to the job role.")
+        if "project" not in resume_text:
+            suggestions.append("Include relevant projects to show practical experience.")
 
-        if not suggestions:
-            suggestions.append("Your CV looks good for this job role, but always double-check keywords and achievements.")
+        return suggestions
 
-        return "\n".join(suggestions)
-
-    # ----------- FINAL CV SCORING -----------
+    # --------------------------------------------------
+    # FINAL SCORING
+    # --------------------------------------------------
     def score_cv(self, parsed_data: Dict, job_name: Optional[str] = "") -> Dict:
         scores = {}
-        all_suggestions = {}
+        suggestions = []
 
-        scores['contact'], all_suggestions['contact'] = self.score_contact_info(
-            parsed_data.get('contact_info', '') or '', parsed_data.get('raw_text', '') or ''
+        scores["contact"], s = self.score_contact_info(
+            parsed_data.get("contact_info", ""),
+            parsed_data.get("raw_text", "")
         )
-        scores['experience'], all_suggestions['experience'] = self.score_experience(
-            parsed_data.get('experience', '') or ''
-        )
-        scores['education'], all_suggestions['education'] = self.score_education(
-            parsed_data.get('education', '') or ''
-        )
-        scores['skills'], all_suggestions['skills'] = self.score_skills(
-            parsed_data.get('skills', '') or ''
-        )
-        scores['format'], all_suggestions['format'] = self.score_format(
-            parsed_data.get('raw_text', '') or ''
+        suggestions.extend(s)
+
+        scores["experience"], s = self.score_experience(parsed_data.get("experience", ""))
+        suggestions.extend(s)
+
+        scores["education"], s = self.score_education(parsed_data.get("education", ""))
+        suggestions.extend(s)
+
+        scores["skills"], s = self.score_skills(parsed_data.get("skills", ""))
+        suggestions.extend(s)
+
+        scores["format"], s = self.score_format(parsed_data.get("raw_text", ""))
+        suggestions.extend(s)
+
+        overall_score = round(
+            sum(scores[k] * self.weights[k] for k in self.weights), 1
         )
 
-        overall_score = self.calculate_overall_score(scores)
-
-        # Merge section suggestions
-        merged_suggestions = []
-        for section in all_suggestions:
-            merged_suggestions.extend(all_suggestions[section])
-
-        # Add job-specific suggestions if job_name provided
         if job_name:
-            merged_suggestions.append(self.generate_resume_suggestions(parsed_data.get('raw_text', ''), job_name))
+            suggestions.extend(
+                self.job_match_suggestions(parsed_data.get("raw_text", ""), job_name)
+            )
 
         return {
-            'overall_score': overall_score,
-            'scores': scores,
-            'suggestions': merged_suggestions
+            "overall_score": overall_score,
+            "section_scores": scores,
+            "suggestions": suggestions[:10]  # limit noise
         }
