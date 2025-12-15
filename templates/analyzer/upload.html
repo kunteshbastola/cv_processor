@@ -71,16 +71,17 @@
                                     <i class="fas fa-graduation-cap me-2"></i>Required Education
                                 </label>
                                 <input type="text" 
-                                       name="required_education" 
-                                       id="id_required_education"
-                                       class="form-control" 
-                                       placeholder="e.g., Bachelor's in Computer Science"
-                                       value="{{ form.required_education.value|default:'' }}">
+                                    name="required_education" 
+                                    id="id_required_education"
+                                    class="form-control" 
+                                    placeholder="e.g., Bachelor's in Computer Science"
+                                    value="{{ form.required_education.value|default:'' }}">
                                 {% if form.required_education.errors %}
                                 <div class="text-danger small">
                                     {{ form.required_education.errors }}
                                 </div>
                                 {% endif %}
+
                             </div>
                         </div>
                         <div class="col-md-6">

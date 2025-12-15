@@ -5,38 +5,34 @@
 
 {% block content %}
 <!-- Hero Section -->
-<section class="hero-hireiq">
-    <div class="container text-center">
-        <h1 class="hero-title">AI-Powered CV Ranking System</h1>
-        <p class="hero-subtitle">Automatically evaluate and rank resumes based on job descriptions using advanced AI and NLP technology.</p>
+<section class="hero-hireiq text-center py-5">
+    <div class="container">
+        <h1 class="hero-title mb-3">AI-Powered CV Ranking System</h1>
+        <p class="hero-subtitle mb-4">Automatically evaluate and rank resumes based on job descriptions using advanced AI and NLP technology.</p>
         <div class="d-flex flex-wrap justify-content-center gap-3 mb-5">
-            <a href="{% url 'upload' %}" class="btn btn-hireiq btn-hireiq-primary">
-                <i class="fas fa-upload"></i> Try as Recruiter
-            </a>
-            <a href="{% url 'upload_and_suggest' %}" class="btn btn-hireiq btn-hireiq-success">
-                <i class="fas fa-user-check"></i> Try as Job Seeker
-            </a>
+            <a href="{% url 'upload' %}" class="btn btn-primary btn-lg"><i class="fas fa-upload me-2"></i> Try as Recruiter</a>
+            <a href="{% url 'upload_and_suggest' %}" class="btn btn-warning btn-lg"><i class="fas fa-user-check me-2"></i> Try as Job Seeker</a>
         </div>
-        
+
         <div class="row g-4">
             <div class="col-md-4">
-                <div class="card-hireiq text-center">
-                    <div class="feature-icon">🔍</div>
-                    <h3 class="h4 mb-3">Automatic CV Ranking</h3>
+                <div class="card feature-card text-center p-4 h-100">
+                    <div class="feature-icon mb-3">🔍</div>
+                    <h3 class="h5 mb-2">Automatic CV Ranking</h3>
                     <p class="text-muted">Rank CVs based on job relevance in seconds using sophisticated AI algorithms.</p>
                 </div>
             </div>
             <div class="col-md-4">
-                <div class="card-hireiq text-center">
-                    <div class="feature-icon">📊</div>
-                    <h3 class="h4 mb-3">Skill Gap Detection</h3>
+                <div class="card feature-card text-center p-4 h-100">
+                    <div class="feature-icon mb-3">📊</div>
+                    <h3 class="h5 mb-2">Skill Gap Detection</h3>
                     <p class="text-muted">Identify missing skills compared to the job description for better hiring decisions.</p>
                 </div>
             </div>
             <div class="col-md-4">
-                <div class="card-hireiq text-center">
-                    <div class="feature-icon">🧠</div>
-                    <h3 class="h4 mb-3">AI & NLP Powered</h3>
+                <div class="card feature-card text-center p-4 h-100">
+                    <div class="feature-icon mb-3">🧠</div>
+                    <h3 class="h5 mb-2">AI & NLP Powered</h3>
                     <p class="text-muted">Uses modern natural language processing for accurate scoring and analysis.</p>
                 </div>
             </div>
@@ -45,26 +41,26 @@
 </section>
 
 <!-- Who Is It For? -->
-<section class="section-hireiq">
+<section class="section-hireiq py-5">
     <div class="container">
-        <h2 class="section-title">Who Is It For?</h2>
-        <p class="section-subtitle">CV Analyzer is designed to help both recruiters and job seekers optimize the hiring process.</p>
-        
+        <h2 class="section-title text-center mb-4">Who Is It For?</h2>
+        <p class="section-subtitle text-center mb-5">CV Analyzer is designed to help both recruiters and job seekers optimize the hiring process.</p>
+
         <div class="row g-4">
             <div class="col-md-6">
-                <div class="card-hireiq text-center">
-                    <div class="feature-icon">👥</div>
-                    <h3 class="h4 mb-3">Recruiters</h3>
-                    <p class="text-muted mb-4">Want to shortlist CVs faster and smarter? Streamline your recruitment process with AI-powered ranking and insights.</p>
-                    <a href="{% url 'upload' %}" class="btn btn-hireiq btn-hireiq-primary">Try as Recruiter</a>
+                <div class="card feature-card text-center p-4 h-100">
+                    <div class="feature-icon mb-3">👥</div>
+                    <h3 class="h5 mb-2">Recruiters</h3>
+                    <p class="text-muted mb-4">Shortlist CVs faster and smarter. Streamline your recruitment process with AI-powered ranking and insights.</p>
+                    <a href="{% url 'upload' %}" class="btn btn-primary">Try as Recruiter</a>
                 </div>
             </div>
             <div class="col-md-6">
-                <div class="card-hireiq text-center">
-                    <div class="feature-icon">👤</div>
-                    <h3 class="h4 mb-3">Job Seekers</h3>
-                    <p class="text-muted mb-4">Want to improve your chances of getting hired? Optimize your CV for specific job descriptions with personalized suggestions.</p>
-                    <a href="{% url 'upload_and_suggest' %}" class="btn btn-hireiq btn-hireiq-success">Try as Job Seeker</a>
+                <div class="card feature-card text-center p-4 h-100">
+                    <div class="feature-icon mb-3">👤</div>
+                    <h3 class="h5 mb-2">Job Seekers</h3>
+                    <p class="text-muted mb-4">Improve your chances of getting hired by optimizing your CV with personalized suggestions.</p>
+                    <a href="{% url 'upload_and_suggest' %}" class="btn btn-warning">Try as Job Seeker</a>
                 </div>
             </div>
         </div>
@@ -72,30 +68,30 @@
 </section>
 
 <!-- How It Works -->
-<section class="section-hireiq bg-light">
+<section class="section-hireiq bg-light py-5">
     <div class="container">
-        <h2 class="section-title">How It Works</h2>
-        <p class="section-subtitle">Get from CV upload to actionable insights in three simple steps.</p>
-        
+        <h2 class="section-title text-center mb-4">How It Works</h2>
+        <p class="section-subtitle text-center mb-5">Get from CV upload to actionable insights in three simple steps.</p>
+
         <div class="row g-4">
             <div class="col-md-4">
-                <div class="card-hireiq text-center">
-                    <div class="step-number">1</div>
-                    <h3 class="h4 mb-3">Upload CV</h3>
+                <div class="card step p-4 text-center h-100">
+                    <div class="step-number mb-3">1</div>
+                    <h3 class="h5 mb-2">Upload CV</h3>
                     <p class="text-muted">Upload one or more CVs and provide job requirements to get started with the analysis.</p>
                 </div>
             </div>
             <div class="col-md-4">
-                <div class="card-hireiq text-center">
-                    <div class="step-number">2</div>
-                    <h3 class="h4 mb-3">AI Evaluation</h3>
+                <div class="card step p-4 text-center h-100">
+                    <div class="step-number mb-3">2</div>
+                    <h3 class="h5 mb-2">AI Evaluation</h3>
                     <p class="text-muted">The system matches and scores CVs using advanced NLP algorithms and keyword analysis.</p>
                 </div>
             </div>
             <div class="col-md-4">
-                <div class="card-hireiq text-center">
-                    <div class="step-number">3</div>
-                    <h3 class="h4 mb-3">Get Insights</h3>
+                <div class="card step p-4 text-center h-100">
+                    <div class="step-number mb-3">3</div>
+                    <h3 class="h5 mb-2">Get Insights</h3>
                     <p class="text-muted">See ranking, skill gaps, and improvement suggestions instantly with detailed reports.</p>
                 </div>
             </div>
@@ -103,31 +99,31 @@
     </div>
 </section>
 
-<!-- Features -->
-<section class="section-hireiq">
+<!-- Key Features -->
+<section class="section-hireiq py-5">
     <div class="container">
-        <h2 class="section-title">Key Features</h2>
-        <p class="section-subtitle">Everything you need to streamline your recruitment or job search process.</p>
-        
+        <h2 class="section-title text-center mb-4">Key Features</h2>
+        <p class="section-subtitle text-center mb-5">Everything you need to streamline your recruitment or job search process.</p>
+
         <div class="row g-4">
             <div class="col-md-4">
-                <div class="card-hireiq text-center">
-                    <div class="feature-icon">📄</div>
-                    <h3 class="h4 mb-3">Resume Parsing</h3>
+                <div class="card feature-card text-center p-4 h-100">
+                    <div class="feature-icon mb-3">📄</div>
+                    <h3 class="h5 mb-2">Resume Parsing</h3>
                     <p class="text-muted">Automatically extract structured candidate information from uploaded CVs for easy review.</p>
                 </div>
             </div>
             <div class="col-md-4">
-                <div class="card-hireiq text-center">
-                    <div class="feature-icon">📥</div>
-                    <h3 class="h4 mb-3">Bulk Upload & Export</h3>
+                <div class="card feature-card text-center p-4 h-100">
+                    <div class="feature-icon mb-3">📥</div>
+                    <h3 class="h5 mb-2">Bulk Upload & Export</h3>
                     <p class="text-muted">Upload multiple resumes at once and export ranking results as CSV or Excel files.</p>
                 </div>
             </div>
             <div class="col-md-4">
-                <div class="card-hireiq text-center">
-                    <div class="feature-icon">📈</div>
-                    <h3 class="h4 mb-3">Detailed Analytics</h3>
+                <div class="card feature-card text-center p-4 h-100">
+                    <div class="feature-icon mb-3">📈</div>
+                    <h3 class="h5 mb-2">Detailed Analytics</h3>
                     <p class="text-muted">Get comprehensive scoring across contact info, experience, education, skills, and formatting.</p>
                 </div>
             </div>
@@ -136,11 +132,11 @@
 </section>
 
 <!-- FAQ -->
-<section class="section-hireiq bg-light">
+<section class="section-hireiq bg-light py-5">
     <div class="container">
-        <h2 class="section-title">Frequently Asked Questions</h2>
-        <p class="section-subtitle">Everything you need to know about CV Analyzer and how it can transform your hiring process.</p>
-        
+        <h2 class="section-title text-center mb-4">Frequently Asked Questions</h2>
+        <p class="section-subtitle text-center mb-5">Everything you need to know about CV Analyzer and how it can transform your hiring process.</p>
+
         <div class="accordion" id="faqAccordion">
             <div class="accordion-item">
                 <h2 class="accordion-header">
@@ -154,7 +150,6 @@
                     </div>
                 </div>
             </div>
-            
             <div class="accordion-item">
                 <h2 class="accordion-header">
                     <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq2">
@@ -163,11 +158,10 @@
                 </h2>
                 <div id="faq2" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
                     <div class="accordion-body">
-                        Simply upload one or more CVs along with a job description. Our system uses advanced Natural Language Processing (NLP) algorithms to evaluate each CV and provide compatibility scores, detailed skill matching analysis, gap identification, and actionable insights for improvement.
+                        Simply upload one or more CVs along with a job description. Our system uses advanced NLP algorithms to evaluate each CV and provide compatibility scores, skill matching analysis, and actionable insights for improvement.
                     </div>
                 </div>
             </div>
-            
             <div class="accordion-item">
                 <h2 class="accordion-header">
                     <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq3">
@@ -176,11 +170,10 @@
                 </h2>
                 <div id="faq3" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
                     <div class="accordion-body">
-                        You can upload CVs in commonly used formats such as PDF, DOC, DOCX, or TXT. Our system supports multiple file formats to ensure maximum compatibility and ease of use.
+                        You can upload CVs in PDF, DOC, DOCX, or TXT formats. Multiple file formats are supported for maximum compatibility.
                     </div>
                 </div>
             </div>
-            
             <div class="accordion-item">
                 <h2 class="accordion-header">
                     <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq4">
@@ -189,7 +182,7 @@
                 </h2>
                 <div id="faq4" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
                     <div class="accordion-body">
-                        Absolutely! You can upload multiple CVs against a single job description to compare and rank candidates more efficiently. This feature is perfect for recruiters managing large candidate pools.
+                        Absolutely! You can upload multiple CVs against a single job description to compare and rank candidates efficiently.
                     </div>
                 </div>
             </div>

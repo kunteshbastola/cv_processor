@@ -1,0 +1,702 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CV Analyzer - AI-Powered Resume Ranking System</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-navy: #2d3748;
+            --secondary-navy: #1a202c;
+            --text-dark: #1a202c;
+            --text-gray: #718096;
+            --bg-light: #f7fafc;
+            --bg-white: #ffffff;
+            --border-color: #e2e8f0;
+            --purple-accent: #9333ea;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+            color: var(--text-dark);
+            line-height: 1.6;
+            background-color: var(--bg-white);
+        }
+
+        /* Navigation */
+        .navbar {
+            padding: 1.5rem 0;
+            background: var(--bg-white);
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .navbar-brand {
+            font-weight: 700;
+            font-size: 1.25rem;
+            color: var(--text-dark);
+        }
+
+        .nav-link {
+            color: var(--text-dark);
+            font-weight: 500;
+            padding: 0.5rem 1rem;
+        }
+
+        .btn-sign-in {
+            background: var(--text-dark);
+            color: white;
+            padding: 0.5rem 1.5rem;
+            border-radius: 6px;
+            font-weight: 500;
+            text-decoration: none;
+            border: none;
+        }
+
+        /* Hero Section */
+        .hero-section {
+            padding: 80px 0 100px;
+            background: var(--bg-light);
+            position: relative;
+        }
+
+        .hero-content h1 {
+            font-size: 3.5rem;
+            font-weight: 700;
+            color: var(--text-dark);
+            line-height: 1.2;
+            margin-bottom: 1.5rem;
+        }
+
+        .hero-content p {
+            font-size: 1.125rem;
+            color: var(--text-gray);
+            margin-bottom: 2rem;
+            max-width: 500px;
+        }
+
+        .hero-image {
+            position: relative;
+        }
+
+        .hero-image img {
+            max-width: 100%;
+            height: auto;
+        }
+
+        .btn-primary-cv {
+            background: var(--primary-navy);
+            color: white;
+            padding: 0.875rem 2rem;
+            border-radius: 6px;
+            font-weight: 600;
+            text-decoration: none;
+            display: inline-block;
+            border: none;
+            margin-right: 1rem;
+        }
+
+        .btn-outline-cv {
+            background: transparent;
+            color: var(--text-dark);
+            padding: 0.875rem 2rem;
+            border-radius: 6px;
+            font-weight: 600;
+            text-decoration: none;
+            display: inline-block;
+            border: 2px solid var(--border-color);
+        }
+
+        /* Key Features Section */
+        .features-section {
+            padding: 80px 0;
+            background: white;
+        }
+
+        .section-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            text-align: center;
+            margin-bottom: 4rem;
+            color: var(--text-dark);
+        }
+
+        .feature-card {
+            text-align: center;
+            padding: 2rem 1.5rem;
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            background: white;
+            height: 100%;
+            transition: all 0.3s ease;
+        }
+
+        .feature-card:hover {
+            box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+            transform: translateY(-4px);
+        }
+
+        .feature-icon {
+            font-size: 2.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .feature-card h3 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: var(--text-dark);
+        }
+
+        .feature-card p {
+            color: var(--text-gray);
+            font-size: 0.95rem;
+            line-height: 1.6;
+        }
+
+        /* Who Is It For Section */
+        .who-section {
+            padding: 80px 0;
+            background: var(--bg-light);
+        }
+
+        .who-card {
+            background: var(--primary-navy);
+            color: white;
+            padding: 3rem 2.5rem;
+            border-radius: 12px;
+            text-align: center;
+            height: 100%;
+        }
+
+        .who-card h3 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+
+        .who-card p {
+            opacity: 0.9;
+            margin-bottom: 2rem;
+            line-height: 1.7;
+        }
+
+        .btn-who {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            padding: 0.75rem 2rem;
+            border-radius: 6px;
+            font-weight: 500;
+            text-decoration: none;
+            display: inline-block;
+            border: none;
+        }
+
+        .btn-who:hover {
+            background: rgba(255,255,255,0.3);
+            color: white;
+        }
+
+        /* How It Works Section */
+        .how-section {
+            padding: 80px 0;
+            background: white;
+        }
+
+        .step-card {
+            text-align: center;
+            padding: 2rem 1.5rem;
+        }
+
+        .step-number {
+            width: 60px;
+            height: 60px;
+            background: var(--primary-navy);
+            color: white;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+        }
+
+        .step-card h3 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: var(--text-dark);
+        }
+
+        .step-card p {
+            color: var(--text-gray);
+            font-size: 0.95rem;
+        }
+
+        /* FAQ Section */
+        .faq-section {
+            padding: 80px 0;
+            background: var(--bg-light);
+            position: relative;
+        }
+
+        .faq-badge {
+            background: var(--text-dark);
+            color: white;
+            padding: 0.5rem 1.5rem;
+            border-radius: 20px;
+            font-weight: 600;
+            display: inline-block;
+            margin-bottom: 1.5rem;
+            font-size: 0.875rem;
+        }
+
+        .faq-intro {
+            text-align: center;
+            max-width: 600px;
+            margin: 0 auto 3rem;
+            color: var(--text-gray);
+        }
+
+        .faq-container {
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        .faq-item {
+            background: white;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            border: 1px solid var(--border-color);
+            overflow: hidden;
+        }
+
+        .faq-question {
+            padding: 1.5rem;
+            font-weight: 600;
+            color: var(--text-dark);
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            user-select: none;
+        }
+
+        .faq-question:hover {
+            background: var(--bg-light);
+        }
+
+        .faq-toggle {
+            font-size: 1.25rem;
+            color: var(--text-gray);
+        }
+
+        .faq-answer {
+            padding: 0 1.5rem 1.5rem;
+            color: var(--text-gray);
+            display: none;
+            line-height: 1.7;
+        }
+
+        .faq-item.active .faq-answer {
+            display: block;
+        }
+
+        .support-card {
+            background: white;
+            padding: 3rem;
+            border-radius: 12px;
+            text-align: center;
+            margin-top: 3rem;
+        }
+
+        .support-card h3 {
+            font-size: 1.75rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: var(--text-dark);
+        }
+
+        .support-card p {
+            color: var(--text-gray);
+            margin-bottom: 2rem;
+        }
+
+        .btn-support {
+            background: var(--text-dark);
+            color: white;
+            padding: 0.875rem 2rem;
+            border-radius: 6px;
+            font-weight: 600;
+            text-decoration: none;
+            display: inline-block;
+            border: none;
+        }
+
+        /* Footer */
+        footer {
+            background: var(--secondary-navy);
+            color: white;
+            padding: 4rem 0 2rem;
+        }
+
+        .footer-brand {
+            font-weight: 700;
+            font-size: 1.25rem;
+            margin-bottom: 1rem;
+        }
+
+        .footer-desc {
+            opacity: 0.8;
+            font-size: 0.95rem;
+            max-width: 300px;
+        }
+
+        .footer-title {
+            font-weight: 600;
+            margin-bottom: 1rem;
+            font-size: 1rem;
+        }
+
+        .footer-links {
+            list-style: none;
+            padding: 0;
+        }
+
+        .footer-links li {
+            margin-bottom: 0.75rem;
+        }
+
+        .footer-links a {
+            color: rgba(255,255,255,0.8);
+            text-decoration: none;
+            font-size: 0.95rem;
+        }
+
+        .footer-links a:hover {
+            color: white;
+        }
+
+        .footer-bottom {
+            border-top: 1px solid rgba(255,255,255,0.1);
+            margin-top: 3rem;
+            padding-top: 2rem;
+            text-align: center;
+            opacity: 0.7;
+            font-size: 0.875rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .hero-content h1 {
+                font-size: 2.5rem;
+            }
+
+            .section-title {
+                font-size: 2rem;
+            }
+
+            .btn-primary-cv, .btn-outline-cv {
+                display: block;
+                margin: 0.5rem 0;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="container">
+            <div class="d-flex justify-content-between align-items-center w-100">
+                <div class="navbar-brand">HireIQ</div>
+                <div class="d-none d-md-flex gap-4 align-items-center">
+                    <a href="#" class="nav-link">Home</a>
+                    <a href="#features" class="nav-link">Features</a>
+                    <a href="#how-it-works" class="nav-link">How It Works</a>
+                    <a href="#faq" class="nav-link">FAQs</a>
+                    <a href="#contact" class="nav-link">Contact</a>
+                    <a href="#signin" class="btn-sign-in">Sign In</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero-section">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-lg-6 hero-content">
+                    <h1>AI-Powered CV Ranking System</h1>
+                    <p>Automatically evaluate and rank resumes based on job descriptions using advanced AI and NLP technology.</p>
+                    <div>
+                        <a href="#upload" class="btn-primary-cv">Upload Your CV</a>
+                        <a href="#recruiters" class="btn-outline-cv">For Recruiters</a>
+                    </div>
+                </div>
+                <div class="col-lg-6 hero-image d-none d-lg-block">
+                    <div style="background: white; padding: 3rem; border-radius: 16px; box-shadow: 0 20px 60px rgba(0,0,0,0.1);">
+                        <div style="background: var(--primary-navy); height: 300px; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: white; font-size: 3rem;">
+                            📄
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Key Features -->
+    <section class="features-section" id="features">
+        <div class="container">
+            <h2 class="section-title">Key Features</h2>
+            <div class="row g-4">
+                <div class="col-md-4">
+                    <div class="feature-card">
+                        <div class="feature-icon">🔍</div>
+                        <h3>Automatic CV Ranking</h3>
+                        <p>Rank CVs based on job relevance in seconds using sophisticated AI algorithms.</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="feature-card">
+                        <div class="feature-icon">📊</div>
+                        <h3>Skill Gap Detection</h3>
+                        <p>Identify missing skills compared to the job description for better hiring decisions.</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="feature-card">
+                        <div class="feature-icon">🧠</div>
+                        <h3>AI & NLP Powered</h3>
+                        <p>Uses modern natural language processing for accurate scoring and analysis.</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="feature-card">
+                        <div class="feature-icon">👥</div>
+                        <h3>Recruiter Dashboard</h3>
+                        <p>Manage and compare candidates efficiently with intuitive tools and insights.</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="feature-card">
+                        <div class="feature-icon">📄</div>
+                        <h3>Resume Parsing & Extraction</h3>
+                        <p>Automatically extract structured candidate information from uploaded CVs for easy review.</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="feature-card">
+                        <div class="feature-icon">📥</div>
+                        <h3>Bulk Upload & Export</h3>
+                        <p>Upload multiple resumes at once and export ranking results as CSV or Excel files.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Who Is It For? -->
+    <section class="who-section">
+        <div class="container">
+            <h2 class="section-title">Who Is It For?</h2>
+            <div class="row g-4">
+                <div class="col-md-6">
+                    <div class="who-card">
+                        <h3>Job Seekers</h3>
+                        <p>Want to improve your chances of getting hired? Optimize your CV for specific job descriptions.</p>
+                        <a href="#jobseeker" class="btn-who">Try as a Job Seeker</a>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="who-card">
+                        <h3>Recruiters</h3>
+                        <p>Want to shortlist CVs faster and smarter? Streamline your recruitment process.</p>
+                        <a href="#recruiter" class="btn-who">Try as a Recruiter</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- How It Works -->
+    <section class="how-section" id="how-it-works">
+        <div class="container">
+            <h2 class="section-title">How It Works</h2>
+            <div class="row g-4">
+                <div class="col-md-4">
+                    <div class="step-card">
+                        <div class="step-number">1</div>
+                        <h3>Upload CV</h3>
+                        <p>Upload one or more CVs and a job description to get started.</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="step-card">
+                        <div class="step-number">2</div>
+                        <h3>AI Evaluation</h3>
+                        <p>The system matches and scores using advanced NLP algorithms.</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="step-card">
+                        <div class="step-number">3</div>
+                        <h3>Get Insights</h3>
+                        <p>Get ranking, skill gaps, and improvement suggestions instantly.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- FAQ Section -->
+    <section class="faq-section" id="faq">
+        <div class="container">
+            <div class="text-center">
+                <div class="faq-badge">FAQ</div>
+                <h2 class="section-title">Frequently Asked Questions</h2>
+                <p class="faq-intro">Everything you need to know about HireIQ and how it can transform your hiring process.</p>
+            </div>
+
+            <div class="faq-container">
+                <div class="faq-item active">
+                    <div class="faq-question" onclick="toggleFaq(this)">
+                        <span>What is HireIQ?</span>
+                        <span class="faq-toggle">+</span>
+                    </div>
+                    <div class="faq-answer">
+                        CV Analyzer is an AI-powered platform that analyzes and ranks CVs based on how well they match a specific job description. It helps recruiters make faster and smarter hiring decisions by providing detailed compatibility scores and insights.
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <div class="faq-question" onclick="toggleFaq(this)">
+                        <span>How does HireIQ work?</span>
+                        <span class="faq-toggle">+</span>
+                    </div>
+                    <div class="faq-answer">
+                        Simply upload one or more CVs along with a job description. Our system uses advanced Natural Language Processing (NLP) algorithms to evaluate each CV and provide compatibility scores, detailed skill matching analysis, gap identification, and actionable insights for improvement.
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <div class="faq-question" onclick="toggleFaq(this)">
+                        <span>What kind of files can I upload?</span>
+                        <span class="faq-toggle">+</span>
+                    </div>
+                    <div class="faq-answer">
+                        You can upload CVs in commonly used formats such as PDF, DOC, DOCX, or TXT. Our system supports multiple file formats to ensure maximum compatibility and ease of use.
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <div class="faq-question" onclick="toggleFaq(this)">
+                        <span>Can I analyze multiple CVs at once?</span>
+                        <span class="faq-toggle">+</span>
+                    </div>
+                    <div class="faq-answer">
+                        Absolutely! You can upload multiple CVs against a single job description to compare and rank candidates more efficiently. This feature is perfect for recruiters managing large candidate pools.
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <div class="faq-question" onclick="toggleFaq(this)">
+                        <span>Do I need to sign up to use HireIQ?</span>
+                        <span class="faq-toggle">+</span>
+                    </div>
+                    <div class="faq-answer">
+                        You can try our basic features without signing up. For full access to advanced features and to save your analysis history, we recommend creating a free account.
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <div class="faq-question" onclick="toggleFaq(this)">
+                        <span>What insights do I get from the analysis?</span>
+                        <span class="faq-toggle">+</span>
+                    </div>
+                    <div class="faq-answer">
+                        You'll receive comprehensive scoring across contact info, experience, education, skills, and formatting. Additionally, you'll get skill gap analysis, improvement suggestions, and detailed compatibility scores.
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <div class="faq-question" onclick="toggleFaq(this)">
+                        <span>Is HireIQ free to use?</span>
+                        <span class="faq-toggle">+</span>
+                    </div>
+                    <div class="faq-answer">
+                        We offer a free tier with basic features. For advanced analytics, bulk processing, and premium support, we offer affordable subscription plans tailored to your needs.
+                    </div>
+                </div>
+            </div>
+
+            <div class="support-card">
+                <h3>Still have questions?</h3>
+                <p>Can't find the answer you're looking for? Our support team is here to help.</p>
+                <a href="#contact" class="btn-support">Contact Support</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="row">
+                <div class="col-md-4 mb-4">
+                    <div class="footer-brand">HireIQ</div>
+                    <p class="footer-desc">Smart recruiting with AI-powered CV analysis and ranking.</p>
+                </div>
+                <div class="col-md-2 mb-4">
+                    <h4 class="footer-title">Quick Links</h4>
+                    <ul class="footer-links">
+                        <li><a href="#">Home</a></li>
+                        <li><a href="#features">Features</a></li>
+                        <li><a href="#how-it-works">How It Works</a></li>
+                        <li><a href="#contact">Contact</a></li>
+                    </ul>
+                </div>
+                <div class="col-md-3 mb-4">
+                    <h4 class="footer-title">Connect</h4>
+                    <ul class="footer-links">
+                        <li><a href="#">Twitter</a></li>
+                        <li><a href="#">LinkedIn</a></li>
+                        <li><a href="#">About</a></li>
+                        <li><a href="#">Blog</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                © 2024 HireIQ. All rights reserved.
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    <script>
+        function toggleFaq(element) {
+            const faqItem = element.parentElement;
+            const isActive = faqItem.classList.contains('active');
+            
+            // Close all FAQs
+            document.querySelectorAll('.faq-item').forEach(item => {
+                item.classList.remove('active');
+                item.querySelector('.faq-toggle').textContent = '+';
+            });
+            
+            // Open clicked FAQ if it wasn't active
+            if (!isActive) {
+                faqItem.classList.add('active');
+                element.querySelector('.faq-toggle').textContent = '−';
+            }
+        }
+    </script>
+</body>
+</html>

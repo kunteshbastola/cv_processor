@@ -1,12 +1,6 @@
 from django import forms
 import os
 
-EDUCATION_CHOICES = [
-    ("bachelor", "Bachelor"),
-    ("master", "Master"),
-    ("phd", "PhD"),
-    ("diploma", "Diploma"),
-]
 
 class CVUploadForm(forms.Form):
     job_name = forms.CharField(
@@ -23,15 +17,14 @@ class CVUploadForm(forms.Form):
         required=False,
         min_value=0,
         label="Minimum Years of Experience",
-        widget=forms.NumberInput(attrs={
-            "class": "form-control",
-            "placeholder": "e.g. 2"
+        widget=forms.TextInput(attrs={
+        "class": "form-control",
+        "placeholder": "e.g., Bachelor's in Computer Science"
         })
     )
 
     required_education = forms.ChoiceField(
         required=False,
-        choices=EDUCATION_CHOICES,
         label="Required Education Level",
         widget=forms.Select(attrs={"class": "form-control"})
     )
