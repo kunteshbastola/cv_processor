@@ -146,6 +146,7 @@ def upload(request):
 
 
 @login_required
+@login_required
 def matched_results(request):
     matched_ids = request.session.get("matched_cv_ids", [])
     if not matched_ids:
@@ -155,7 +156,13 @@ def matched_results(request):
             "error_message": "No CVs have been uploaded or matched yet."
         })
 
+    # Get CVs and sort by matching score (descending)
     cvs = CVUpload.objects.filter(id__in=matched_ids, processed=True).order_by('-matching_score')
+    
+    # Update session with sorted IDs
+    sorted_ids = list(cvs.values_list('id', flat=True))
+    request.session["matched_cv_ids"] = sorted_ids
+    
     job_title = request.session.get("job_title", "")
 
     return render(request, "analyzer/matched_results.html", {

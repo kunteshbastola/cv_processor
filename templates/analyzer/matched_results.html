@@ -8,14 +8,17 @@
     <div class="col-md-12">
         <div class="card shadow">
             <div class="card-header bg-success text-white d-flex justify-content-between align-items-center">
-                <h3 class="mb-0">
-                    <i class="fas fa-chart-line me-2"></i>CV Matching Results
-                </h3>
-                {% if job_title %}
+                <div>
+                    <h3 class="mb-0">
+                        <i class="fas fa-trophy me-2"></i>Ranked CV Results
+                    </h3>
+                    {% if job_title %}
+                    <small class="opacity-75">For: {{ job_title }}</small>
+                    {% endif %}
+                </div>
                 <span class="badge bg-light text-dark fs-6">
-                    Job: {{ job_title }}
+                    {{ cvs|length }} CV{{ cvs|pluralize:"s" }}
                 </span>
-                {% endif %}
             </div>
             
             {% if error_message %}
@@ -31,116 +34,114 @@
             
             {% elif cvs %}
             <div class="card-body">
-                <!-- Summary Stats -->
+                <!-- Ranking Summary -->
                 <div class="row mb-4">
                     <div class="col-md-3">
+                        <div class="stat-card text-center p-3 bg-primary text-white rounded">
+                            <h2 class="mb-1">#1</h2>
+                            <p class="mb-0">{{ cvs.0.filename|default:cvs.0.file.name|truncatechars:20 }}</p>
+                            <small>{{ cvs.0.matching_score|floatformat:1 }}% Match</small>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
                         <div class="stat-card text-center p-3 bg-light rounded">
-                            <h2 class="text-primary">{{ cvs|length }}</h2>
+                            <h2 class="text-success">{{ cvs|length }}</h2>
                             <p class="mb-0">Total CVs</p>
                         </div>
                     </div>
                     <div class="col-md-3">
                         <div class="stat-card text-center p-3 bg-light rounded">
-                            <h2 class="text-success">
-                                {{ cvs.0.matching_score|floatformat:1 }}%
-                            </h2>
-                            <p class="mb-0">Top Match</p>
-                        </div>
-                    </div>
-                    <div class="col-md-3">
-                        <div class="stat-card text-center p-3 bg-light rounded">
-                            {% with avg=cvs|dictsortreversed:"matching_score"|slice:":5" %}
                             <h2 class="text-warning">
-                                {{ cvs|slice:":5"|dictsortreversed:"matching_score"|first|default:"0"|floatformat:1 }}%
+                                {% with avg=cvs|slice:":3" %}
+                                {{ avg|dictsortreversed:"matching_score"|first.matching_score|floatformat:1 }}%
+                                {% endwith %}
                             </h2>
-                            {% endwith %}
-                            <p class="mb-0">Avg Top 5</p>
+                            <p class="mb-0">Top 3 Avg</p>
                         </div>
                     </div>
                     <div class="col-md-3">
                         <div class="stat-card text-center p-3 bg-light rounded">
                             <h2 class="text-info">
-                                {{ cvs|dictsort:"matching_score"|last.matching_score|floatformat:1 }}%
+                                {% with last=cvs|dictsort:"matching_score"|last %}
+                                {{ last.matching_score|floatformat:1 }}%
+                                {% endwith %}
                             </h2>
                             <p class="mb-0">Lowest Match</p>
                         </div>
                     </div>
                 </div>
 
-                <!-- Results Table -->
+                <!-- Rankings Table -->
                 <div class="table-responsive">
                     <table class="table table-hover">
                         <thead class="table-dark">
                             <tr>
-                                <th>Rank</th>
+                                <th width="80">Rank</th>
                                 <th>CV File</th>
-                                <th>Matching Score</th>
-                                <th>Experience</th>
-                                <th>Education</th>
-                                <th>Skills</th>
-                                <th>Overall Score</th>
-                                <th>Uploaded</th>
-                                <th>Actions</th>
+                                <th width="150">Matching Score</th>
+                                <th width="150">Overall Score</th>
+                                <th width="120">Status</th>
+                                <th width="150">Uploaded</th>
+                                <th width="180">Actions</th>
                             </tr>
                         </thead>
                         <tbody>
                             {% for cv in cvs %}
-                            <tr>
-                                <td>
-                                    <span class="badge {% if forloop.first %}bg-warning{% elif forloop.counter <= 3 %}bg-info{% else %}bg-secondary{% endif %} fs-6">
-                                        #{{ forloop.counter }}
-                                    </span>
+                            <tr class="cv-row" data-cv-id="{{ cv.id }}" style="cursor: pointer;">
+                                <td onclick="event.stopPropagation();">
+                                    <div class="d-flex align-items-center">
+                                        {% if forloop.first %}
+                                        <span class="badge bg-warning fs-6 me-2">🥇</span>
+                                        {% elif forloop.counter == 2 %}
+                                        <span class="badge bg-secondary fs-6 me-2">🥈</span>
+                                        {% elif forloop.counter == 3 %}
+                                        <span class="badge bg-danger fs-6 me-2">🥉</span>
+                                        {% else %}
+                                        <span class="badge bg-light text-dark fs-6 me-2">#{{ forloop.counter }}</span>
+                                        {% endif %}
+                                    </div>
                                 </td>
                                 <td>
-                                    <i class="fas fa-file-pdf text-danger me-2"></i>
-                                    <a href="{{ cv.file.url }}" target="_blank" class="text-decoration-none">
-                                        {{ cv.filename|default:cv.file.name|truncatechars:30 }}
-                                    </a>
-                                </td>
-                                <td>
-                                    <div class="progress" style="height: 25px;">
-                                        <div class="progress-bar 
-                                            {% if cv.matching_score >= 80 %}bg-success
-                                            {% elif cv.matching_score >= 60 %}bg-warning
-                                            {% else %}bg-danger{% endif %}" 
-                                            role="progressbar" 
-                                            style="width: {{ cv.matching_score }}%;"
-                                            aria-valuenow="{{ cv.matching_score }}" 
-                                            aria-valuemin="0" 
-                                            aria-valuemax="100">
-                                            <strong>{{ cv.matching_score|floatformat:1 }}%</strong>
+                                    <div class="d-flex align-items-center">
+                                        {% if cv.file.name|lower|slice:"-4:" == ".pdf" %}
+                                        <i class="fas fa-file-pdf fa-lg text-danger me-3"></i>
+                                        {% elif cv.file.name|lower|slice:"-4:" == ".doc" or cv.file.name|lower|slice:"-5:" == ".docx" %}
+                                        <i class="fas fa-file-word fa-lg text-primary me-3"></i>
+                                        {% else %}
+                                        <i class="fas fa-file-alt fa-lg text-secondary me-3"></i>
+                                        {% endif %}
+                                        <div>
+                                            <strong class="d-block">{{ cv.filename|default:cv.file.name|truncatechars:40 }}</strong>
+                                            <small class="text-muted">
+                                                {% if cv.target_job_role %}
+                                                Target: {{ cv.target_job_role }}
+                                                {% else %}
+                                                No target role specified
+                                                {% endif %}
+                                            </small>
                                         </div>
                                     </div>
                                 </td>
-                                <td>
-                                    {% if cv.experience %}
-                                    <span class="badge bg-info">{{ cv.experience|truncatechars:40 }}</span>
-                                    {% else %}
-                                    <span class="text-muted">N/A</span>
-                                    {% endif %}
-                                </td>
-                                <td>
-                                    {% if cv.education %}
-                                    <span class="badge bg-success">{{ cv.education|truncatechars:40 }}</span>
-                                    {% else %}
-                                    <span class="text-muted">N/A</span>
-                                    {% endif %}
-                                </td>
-                                <td>
-                                    {% if cv.skills %}
-                                    <div class="skills-tags">
-                                        {% for skill in cv.skills|slice:":3" %}
-                                        <span class="badge bg-primary me-1 mb-1">{{ skill }}</span>
-                                        {% endfor %}
-                                        {% if cv.skills|length > 3 %}
-                                        <span class="badge bg-secondary">+{{ cv.skills|length|add:"-3" }}</span>
-                                        {% endif %}
+                                <td onclick="event.stopPropagation();">
+                                    <div class="d-flex align-items-center">
+                                        <div class="me-2">
+                                            <strong>{{ cv.matching_score|floatformat:1 }}%</strong>
+                                        </div>
+                                        <div class="flex-grow-1">
+                                            <div class="progress" style="height: 8px;">
+                                                <div class="progress-bar 
+                                                    {% if cv.matching_score >= 80 %}bg-success
+                                                    {% elif cv.matching_score >= 60 %}bg-warning
+                                                    {% else %}bg-danger{% endif %}" 
+                                                    role="progressbar" 
+                                                    style="width: {{ cv.matching_score }}%;"
+                                                    title="{{ cv.matching_score|floatformat:1 }}% match">
+                                                </div>
+                                            </div>
+                                        </div>
                                     </div>
-                                    {% else %}
-                                    <span class="text-muted">N/A</span>
-                                    {% endif %}
                                 </td>
-                                <td>
+                                <td onclick="event.stopPropagation();">
                                     <div class="star-rating">
                                         {% for i in "12345" %}
                                         <i class="fas fa-star {% if forloop.counter <= cv.overall_score|divide:20 %}text-warning{% else %}text-secondary{% endif %}"></i>
@@ -148,19 +149,37 @@
                                         <small class="ms-1">({{ cv.overall_score|floatformat:1 }})</small>
                                     </div>
                                 </td>
-                                <td>
-                                    <small>{{ cv.uploaded_at|date:"M d, Y" }}</small>
+                                <td onclick="event.stopPropagation();">
+                                    {% if cv.matching_score >= 80 %}
+                                    <span class="badge bg-success">Excellent</span>
+                                    {% elif cv.matching_score >= 60 %}
+                                    <span class="badge bg-warning">Good</span>
+                                    {% elif cv.matching_score >= 40 %}
+                                    <span class="badge bg-info">Fair</span>
+                                    {% else %}
+                                    <span class="badge bg-danger">Poor</span>
+                                    {% endif %}
                                 </td>
-                                <td>
+                                <td onclick="event.stopPropagation();">
+                                    <small>{{ cv.uploaded_at|date:"M d" }}</small>
+                                    <br>
+                                    <small class="text-muted">{{ cv.uploaded_at|time:"H:i" }}</small>
+                                </td>
+                                <td onclick="event.stopPropagation();">
                                     <div class="btn-group btn-group-sm">
+                                        <a href="{% url 'cv_detail' cv.id %}" 
+                                           class="btn btn-outline-primary" 
+                                           title="View Details">
+                                            <i class="fas fa-eye me-1"></i> View
+                                        </a>
                                         <a href="{% url 'cv_suggestions' cv.id %}" 
                                            class="btn btn-outline-info" 
-                                           title="View Suggestions">
+                                           title="Suggestions">
                                             <i class="fas fa-lightbulb"></i>
                                         </a>
                                         <a href="{{ cv.file.url }}" 
                                            target="_blank" 
-                                           class="btn btn-outline-primary"
+                                           class="btn btn-outline-success"
                                            title="Download">
                                             <i class="fas fa-download"></i>
                                         </a>
@@ -177,18 +196,55 @@
                     </table>
                 </div>
 
+                <!-- Visual Ranking Chart -->
+                <div class="card mt-4">
+                    <div class="card-header bg-dark text-white">
+                        <h5 class="mb-0"><i class="fas fa-chart-bar me-2"></i>Matching Score Distribution</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            {% for cv in cvs|slice:":6" %}
+                            <div class="col-md-2 mb-3">
+                                <div class="text-center">
+                                    <div class="position-relative d-inline-block mb-2">
+                                        {% if forloop.first %}
+                                        <div class="crown">👑</div>
+                                        {% endif %}
+                                        <div class="score-circle mx-auto 
+                                            {% if cv.matching_score >= 80 %}bg-success
+                                            {% elif cv.matching_score >= 60 %}bg-warning
+                                            {% else %}bg-danger{% endif %}">
+                                            <span class="score-value">{{ cv.matching_score|floatformat:0 }}%</span>
+                                        </div>
+                                    </div>
+                                    <div class="small text-truncate" title="{{ cv.filename|default:cv.file.name }}">
+                                        {{ cv.filename|default:cv.file.name|truncatechars:15 }}
+                                    </div>
+                                    <div class="small text-muted">#{{ forloop.counter }}</div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Action Buttons -->
                 <div class="mt-4 d-flex justify-content-between">
-                    <a href="{% url 'upload' %}" class="btn btn-primary">
-                        <i class="fas fa-plus me-2"></i>Upload More CVs
-                    </a>
                     <div>
-                        <button class="btn btn-success me-2" onclick="window.print()">
-                            <i class="fas fa-print me-2"></i>Print Results
-                        </button>
-                        <a href="#" class="btn btn-outline-success">
-                            <i class="fas fa-file-export me-2"></i>Export to CSV
+                        <a href="{% url 'upload' %}" class="btn btn-primary">
+                            <i class="fas fa-plus me-2"></i>Upload More CVs
                         </a>
+                        <a href="{% url 'home' %}" class="btn btn-outline-secondary ms-2">
+                            <i class="fas fa-home me-2"></i>Back to Home
+                        </a>
+                    </div>
+                    <div>
+                        <button class="btn btn-outline-success me-2" onclick="exportToCSV()">
+                            <i class="fas fa-file-export me-2"></i>Export CSV
+                        </button>
+                        <button class="btn btn-success" onclick="window.print()">
+                            <i class="fas fa-print me-2"></i>Print Report
+                        </button>
                     </div>
                 </div>
             </div>
@@ -209,11 +265,77 @@
 </div>
 {% endblock %}
 
+{% block extra_css %}
+<style>
+.cv-row:hover {
+    background-color: rgba(0, 123, 255, 0.05) !important;
+    transform: translateX(5px);
+    transition: all 0.3s ease;
+}
+
+.score-circle {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    color: white;
+    font-weight: bold;
+}
+
+.score-value {
+    font-size: 1rem;
+}
+
+.crown {
+    position: absolute;
+    top: -20px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 1.5rem;
+    z-index: 1;
+}
+
+.star-rating {
+    color: #ffc107;
+}
+
+/* Print styles */
+@media print {
+    .btn, .no-print, .crown {
+        display: none !important;
+    }
+    
+    .cv-row {
+        break-inside: avoid;
+    }
+    
+    .score-circle {
+        border: 2px solid #000 !important;
+        color: #000 !important;
+        background: white !important;
+    }
+}
+</style>
+{% endblock %}
+
 {% block extra_js %}
 <script>
 $(document).ready(function() {
+    // Make entire row clickable (except action buttons)
+    $('.cv-row').on('click', function(e) {
+        // Don't trigger if clicking on buttons or links
+        if (!$(e.target).closest('a, button').length) {
+            const cvId = $(this).data('cv-id');
+            window.location.href = `/cv-detail/${cvId}/`;
+        }
+    });
+    
     // Delete CV functionality
-    $('.delete-cv').on('click', function() {
+    $('.delete-cv').on('click', function(e) {
+        e.stopPropagation();
         const cvId = $(this).data('cv-id');
         const row = $(this).closest('tr');
         
@@ -229,6 +351,10 @@ $(document).ready(function() {
                     row.fadeOut(300, function() {
                         $(this).remove();
                         showToast('CV deleted successfully', 'success');
+                        // Reload page if no rows left
+                        if ($('.cv-row').length === 0) {
+                            setTimeout(() => location.reload(), 1000);
+                        }
                     });
                 },
                 error: function(xhr) {
@@ -238,11 +364,52 @@ $(document).ready(function() {
         }
     });
     
+    // Export to CSV function
+    window.exportToCSV = function() {
+        const rows = [];
+        const headers = ['Rank', 'Filename', 'Matching Score', 'Overall Score', 'Status', 'Uploaded', 'Job Role'];
+        
+        rows.push(headers.join(','));
+        
+        $('.cv-row').each(function(index) {
+            const row = $(this);
+            const rank = index + 1;
+            const filename = row.find('strong').text().trim();
+            const matchScore = row.find('.progress-bar').attr('style').match(/width:\s*([\d.]+)%/)[1];
+            const overallScore = row.find('.star-rating small').text().match(/\(([\d.]+)\)/)[1];
+            const status = row.find('.badge').eq(0).text().trim();
+            const uploaded = row.find('td').eq(5).text().trim().replace('\n', ' ');
+            const jobRole = row.find('small.text-muted').text().replace('Target: ', '').trim();
+            
+            rows.push([
+                rank,
+                `"${filename}"`,
+                `${matchScore}%`,
+                overallScore,
+                status,
+                `"${uploaded}"`,
+                `"${jobRole}"`
+            ].join(','));
+        });
+        
+        const csvContent = rows.join('\n');
+        const blob = new Blob([csvContent], { type: 'text/csv' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `cv_ranking_${new Date().toISOString().slice(0,10)}.csv`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        
+        showToast('CSV exported successfully', 'success');
+    };
+    
     function showToast(message, type) {
-        // Create toast notification
         const toast = $(`
             <div class="toast align-items-center text-white bg-${type === 'success' ? 'success' : 'danger'} border-0"
-                 role="alert" aria-live="assertive" aria-atomic="true">
+                role="alert" aria-live="assertive" aria-atomic="true">
                 <div class="d-flex">
                     <div class="toast-body">
                         <i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'} me-2"></i>
@@ -262,19 +429,4 @@ $(document).ready(function() {
     }
 });
 </script>
-
-<style>
-.star-rating {
-    color: #ffc107;
-}
-.skills-tags {
-    max-width: 200px;
-}
-.progress {
-    border-radius: 5px;
-}
-.progress-bar {
-    font-size: 0.8rem;
-}
-</style>
 {% endblock %}
