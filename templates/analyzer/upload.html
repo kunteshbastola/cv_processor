@@ -3,15 +3,15 @@
 {% block title %}Bulk Upload - CV Analyzer{% endblock %}
 
 {% block content %}
-<div class="row justify-content-center">
-    <div class="col-md-10">
-        <div class="card shadow">
-            <div class="card-header bg-primary text-white">
+<div class="row justify-content-center py-4">
+    <div class="col-lg-10">
+        <div class="card shadow-lg border-0 rounded-4">
+            <div class="card-header bg-gradient-primary text-white rounded-top-4">
                 <h3 class="mb-0">
                     <i class="fas fa-upload me-2"></i>Bulk CV Upload
                 </h3>
             </div>
-            <div class="card-body">
+            <div class="card-body p-4">
                 <p class="text-muted mb-4">
                     Upload multiple CVs and specify job requirements to get matching scores.
                     Supported formats: PDF, DOC, DOCX, TXT (Max 5MB each)
@@ -19,129 +19,88 @@
 
                 <form method="POST" enctype="multipart/form-data" id="uploadForm">
                     {% csrf_token %}
-                    
+
                     <!-- Job Details -->
-                    <div class="row mb-4">
+                    <div class="row g-3 mb-4">
                         <div class="col-md-6">
-                            <div class="form-group mb-3">
-                                <label for="id_job_name" class="form-label fw-bold">
-                                    <i class="fas fa-briefcase me-2"></i>Job Title/Role
-                                </label>
-                                <input type="text" 
-                                       name="job_name" 
-                                       id="id_job_name"
-                                       class="form-control" 
-                                       placeholder="e.g., Senior Python Developer"
-                                       value="{{ form.job_name.value|default:'' }}"
-                                       required>
-                                {% if form.job_name.errors %}
-                                <div class="text-danger small">
-                                    {{ form.job_name.errors }}
-                                </div>
-                                {% endif %}
-                            </div>
+                            <label for="id_job_name" class="form-label fw-bold">
+                                <i class="fas fa-briefcase me-2"></i>Job Title/Role
+                            </label>
+                            <input type="text" name="job_name" id="id_job_name"
+                                   class="form-control form-control-lg"
+                                   placeholder="e.g., Senior Python Developer"
+                                   value="{{ form.job_name.value|default:'' }}" required>
+                            {% if form.job_name.errors %}
+                            <div class="text-danger small mt-1">{{ form.job_name.errors }}</div>
+                            {% endif %}
                         </div>
                         <div class="col-md-6">
-                            <div class="form-group mb-3">
-                                <label for="id_required_experience" class="form-label fw-bold">
-                                    <i class="fas fa-calendar-alt me-2"></i>Required Experience (Years)
-                                </label>
-                                <input type="number" 
-                                       name="required_experience" 
-                                       id="id_required_experience"
-                                       class="form-control" 
-                                       min="0" 
-                                       max="50"
-                                       placeholder="e.g., 3"
-                                       value="{{ form.required_experience.value|default:'' }}">
-                                {% if form.required_experience.errors %}
-                                <div class="text-danger small">
-                                    {{ form.required_experience.errors }}
-                                </div>
-                                {% endif %}
-                            </div>
+                            <label for="id_required_experience" class="form-label fw-bold">
+                                <i class="fas fa-calendar-alt me-2"></i>Required Experience (Years)
+                            </label>
+                            <input type="number" name="required_experience" id="id_required_experience"
+                                   class="form-control form-control-lg" min="0" max="50"
+                                   placeholder="e.g., 3" value="{{ form.required_experience.value|default:'' }}">
+                            {% if form.required_experience.errors %}
+                            <div class="text-danger small mt-1">{{ form.required_experience.errors }}</div>
+                            {% endif %}
                         </div>
                     </div>
 
                     <!-- Education and Skills -->
-                    <div class="row mb-4">
+                    <div class="row g-3 mb-4">
                         <div class="col-md-6">
-                            <div class="form-group mb-3">
-                                <label for="id_required_education" class="form-label fw-bold">
-                                    <i class="fas fa-graduation-cap me-2"></i>Required Education
-                                </label>
-                                <input type="text" 
-                                    name="required_education" 
-                                    id="id_required_education"
-                                    class="form-control" 
-                                    placeholder="e.g., Bachelor's in Computer Science"
-                                    value="{{ form.required_education.value|default:'' }}">
-                                {% if form.required_education.errors %}
-                                <div class="text-danger small">
-                                    {{ form.required_education.errors }}
-                                </div>
-                                {% endif %}
-
-                            </div>
+                            <label for="id_required_education" class="form-label fw-bold">
+                                <i class="fas fa-graduation-cap me-2"></i>Required Education
+                            </label>
+                            <input type="text" name="required_education" id="id_required_education"
+                                   class="form-control form-control-lg"
+                                   placeholder="e.g., Bachelor's in Computer Science"
+                                   value="{{ form.required_education.value|default:'' }}">
+                            {% if form.required_education.errors %}
+                            <div class="text-danger small mt-1">{{ form.required_education.errors }}</div>
+                            {% endif %}
                         </div>
                         <div class="col-md-6">
-                            <div class="form-group mb-3">
-                                <label for="id_required_skills" class="form-label fw-bold">
-                                    <i class="fas fa-code me-2"></i>Required Skills (comma separated)
-                                </label>
-                                <input type="text" 
-                                       name="required_skills" 
-                                       id="id_required_skills"
-                                       class="form-control" 
-                                       placeholder="e.g., Python, Django, React, PostgreSQL"
-                                       value="{{ form.required_skills.value|default:'' }}">
-                                <small class="text-muted">Enter skills separated by commas</small>
-                                {% if form.required_skills.errors %}
-                                <div class="text-danger small">
-                                    {{ form.required_skills.errors }}
-                                </div>
-                                {% endif %}
-                            </div>
+                            <label for="id_required_skills" class="form-label fw-bold">
+                                <i class="fas fa-code me-2"></i>Required Skills (comma separated)
+                            </label>
+                            <input type="text" name="required_skills" id="id_required_skills"
+                                   class="form-control form-control-lg"
+                                   placeholder="e.g., Python, Django, React, PostgreSQL"
+                                   value="{{ form.required_skills.value|default:'' }}">
+                            <small class="text-muted">Enter skills separated by commas</small>
+                            {% if form.required_skills.errors %}
+                            <div class="text-danger small mt-1">{{ form.required_skills.errors }}</div>
+                            {% endif %}
                         </div>
                     </div>
 
                     <!-- File Upload -->
                     <div class="mb-4">
                         <label for="id_cv_files" class="form-label fw-bold">
-                            <i class="fas fa-file me-2"></i>Select CV Files
+                            <i class="fas fa-file-upload me-2"></i>Select CV Files
                         </label>
-                        <input type="file" 
-                               name="cv_files" 
-                               id="id_cv_files"
-                               class="form-control" 
-                               multiple 
-                               accept=".pdf,.doc,.docx,.txt"
-                               required>
-                        <div class="mt-2">
-                            <small class="text-muted">
-                                <i class="fas fa-info-circle"></i> 
-                                You can select multiple files (Ctrl+Click)
-                            </small>
-                        </div>
-                        {% if form.cv_files.errors %}
-                        <div class="text-danger small">
-                            {{ form.cv_files.errors }}
-                        </div>
-                        {% endif %}
+                        <input type="file" name="cv_files" id="id_cv_files"
+                               class="form-control form-control-lg" multiple
+                               accept=".pdf,.doc,.docx,.txt" required>
+                        <small class="text-muted d-block mt-1">
+                            <i class="fas fa-info-circle"></i> You can select multiple files (Ctrl+Click)
+                        </small>
                     </div>
 
                     <!-- File Preview -->
-                    <div class="mb-4" id="filePreview">
+                    <div class="mb-4" id="filePreview" style="display:none;">
                         <h5 class="mb-3">Selected Files:</h5>
-                        <div id="selectedFiles" class="list-group"></div>
+                        <div id="selectedFiles" class="list-group list-group-flush shadow-sm rounded-3"></div>
                     </div>
 
                     <!-- Submit Button -->
-                    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
-                        <button type="reset" class="btn btn-secondary me-2">
+                    <div class="d-flex justify-content-end gap-2">
+                        <button type="reset" class="btn btn-outline-secondary btn-lg">
                             <i class="fas fa-redo me-2"></i>Reset
                         </button>
-                        <button type="submit" class="btn btn-primary" id="submitBtn">
+                        <button type="submit" class="btn btn-gradient-primary btn-lg" id="submitBtn">
                             <i class="fas fa-play me-2"></i>Analyze CVs
                         </button>
                     </div>
@@ -155,40 +114,31 @@
 {% block extra_js %}
 <script>
 $(document).ready(function() {
+    const preview = $('#selectedFiles');
+
     // File selection preview
     $('#id_cv_files').on('change', function() {
         const files = $(this)[0].files;
-        const preview = $('#selectedFiles');
         preview.empty();
-        
-        if (files.length > 0) {
+        if(files.length){
             $('#filePreview').show();
-            for (let i = 0; i < files.length; i++) {
-                const file = files[i];
-                const fileSize = (file.size / 1024 / 1024).toFixed(2); // MB
-                const listItem = `
+            Array.from(files).forEach(file => {
+                const size = (file.size / 1024 / 1024).toFixed(2);
+                preview.append(`
                     <div class="list-group-item d-flex justify-content-between align-items-center">
-                        <div>
-                            <i class="fas fa-file text-primary me-2"></i>
-                            <span class="file-name">${file.name}</span>
-                        </div>
-                        <span class="badge bg-info rounded-pill">${fileSize} MB</span>
+                        <div><i class="fas fa-file-alt text-primary me-2"></i>${file.name}</div>
+                        <span class="badge bg-info rounded-pill">${size} MB</span>
                     </div>
-                `;
-                preview.append(listItem);
-            }
+                `);
+            });
         } else {
             $('#filePreview').hide();
         }
     });
-    
-    // Initially hide file preview
-    $('#filePreview').hide();
-    
-    // Form submission
+
+    // Form submit spinner
     $('#uploadForm').on('submit', function() {
-        $('#submitBtn').prop('disabled', true);
-        $('#submitBtn').html('<i class="fas fa-spinner fa-spin me-2"></i>Processing...');
+        $('#submitBtn').prop('disabled', true).html('<i class="fas fa-spinner fa-spin me-2"></i>Processing...');
     });
 });
 </script>
