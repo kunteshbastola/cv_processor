@@ -357,9 +357,9 @@ def api_delete_cv(request, cv_id):
     """API endpoint to delete a CV"""
     cv = get_object_or_404(CVUpload, id=cv_id, user=request.user)
 
-    # Delete file safely
-    if cv.file and default_storage.exists(cv_file.name):
+    if cv.file and default_storage.exists(cv.file.name):
         default_storage.delete(cv.file.name)
+
 
     cv.delete()
     return Response({"message": "CV deleted successfully"}, status=status.HTTP_204_NO_CONTENT)
