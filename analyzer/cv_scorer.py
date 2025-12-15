@@ -72,6 +72,31 @@ def generate_job_keyword_suggestions(resume_text: str, job_name: str) -> List[st
     
     return suggestions
 
+
+def generate_full_cv_suggestions(parsed_data: dict, job_name: str) -> str:
+    """
+    Returns a unified, actionable CV suggestion list as a single string.
+    Combines CVScorer default suggestions + job keyword suggestions.
+    """
+    scorer = CVScorer()
+    
+    # 1️⃣ Get all suggestions from CVScorer (with job_name for keywords)
+    scoring_results = scorer.score_cv(parsed_data, job_name)
+    suggestions = scoring_results.get("suggestions", [])
+    
+    # 2️⃣ Deduplicate while preserving order
+    seen = set()
+    full_suggestions = []
+    for s in suggestions:
+        normalized = s.strip().lower()
+        if normalized not in seen:
+            full_suggestions.append(s.strip())
+            seen.add(normalized)
+    
+    # 3️⃣ Combine into readable string
+    return "\n".join(f"• {s}" for s in full_suggestions)
+
+
 # ------------------ CVSCORER CLASS ------------------
 class CVScorer:
     def __init__(self):
