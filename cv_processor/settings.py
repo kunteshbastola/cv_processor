@@ -157,12 +157,12 @@ SOCIALACCOUNT_PROVIDERS = {
 
 
 # Static files (CSS, JavaScript, Images)
-# Static files
 STATIC_URL = '/static/'
 STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, 'static'),
+    BASE_DIR / "static",  # if you have a global static folder
 ]
-STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+STATIC_ROOT = BASE_DIR / "staticfiles"  # for collectstatic
+
 
 
 # Password validation

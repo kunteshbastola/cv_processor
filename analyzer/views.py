@@ -217,6 +217,7 @@ def cv_suggestions(request, cv_id):
     return render(request, "analyzer/cv_suggestions.html", {"cv": cv, "suggestions": suggestions[:2000]})
 
 
+
 @api_view(['DELETE'])
 @permission_classes([IsAuthenticated])
 def api_delete_cv(request, cv_id):
