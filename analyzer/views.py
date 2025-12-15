@@ -31,6 +31,8 @@ def upload(request):
         form = CVUploadForm(request.POST, request.FILES)
         files = request.FILES.getlist("cv_files")
 
+        job_name = (request.POST.get("job_name") or "").strip()
+
         if form.is_valid():
             required_experience = form.cleaned_data.get('required_experience')
             required_education = (form.cleaned_data.get('required_education') or '').lower()
@@ -62,7 +64,8 @@ def upload(request):
                     parsed_data = parser.parse_cv(cv_upload.file, file_ext)
 
 
-                    scoring_results = scorer.score_cv(parsed_data)
+                    scoring_results = scorer.score_cv(parsed_data, job_name)
+
 
                     # Save parsed content
                     cv_upload.raw_text = parsed_data.get("raw_text", '') or ''
@@ -167,26 +170,18 @@ def matched_results(request):
 
 @login_required
 def upload_and_suggest(request):
+    suggestions = []  # initialize
     if request.method == "POST":
         file = request.FILES.get("file")
         job_name = (request.POST.get("job_name") or "").strip()
 
-        if not file:
-            messages.error(request, "No CV file uploaded.")
-            return render(request, "analyzer/upload_and_suggest.html")
-        if not job_name:
-            messages.error(request, "Please specify a job title for suggestions.")
+        if not file or not job_name:
+            messages.error(request, "Please upload a CV and specify a job title.")
             return render(request, "analyzer/upload_and_suggest.html")
 
         file_ext = os.path.splitext(file.name)[1].lower()
-        allowed_exts = ['.pdf', '.doc', '.docx', '.txt']
-        max_size = 5 * 1024 * 1024
-
-        if file_ext not in allowed_exts:
-            messages.error(request, f"Unsupported file format: {file_ext}")
-            return render(request, "analyzer/upload_and_suggest.html")
-        if file.size > max_size:
-            messages.error(request, "File size exceeds 5MB limit.")
+        if file_ext not in ['.pdf','.doc','.docx','.txt']:
+            messages.error(request, "Unsupported file format.")
             return render(request, "analyzer/upload_and_suggest.html")
 
         cv_upload = CVUpload(user=request.user, file=file, target_job_role=job_name)
@@ -199,63 +194,20 @@ def upload_and_suggest(request):
             with default_storage.open(cv_upload.file.name, 'rb') as f:
                 parsed_data = parser.parse_cv(f, file_ext)
 
-            scoring_results = scorer.score_cv(parsed_data)
+            # Generate job-specific suggestions
+            suggestions = generate_job_keyword_suggestions(parsed_data.get("raw_text",""), job_name)
 
-            # Save parsed data
-            cv_upload.raw_text = parsed_data.get('raw_text', '') or ''
-            cv_upload.contact_info = parsed_data.get('contact_info', '') or ''
-            cv_upload.experience = parsed_data.get('experience', '') or ''
-            cv_upload.education = parsed_data.get('education', '') or ''
-            cv_upload.skills = parsed_data.get('skills', '') or ''
-
-            # Save scores
-            scores = scoring_results.get('section_scores', {})
-            cv_upload.overall_score = scoring_results.get('overall_score', 0) or 0
-            cv_upload.contact_score = scores.get("contact", 0) or 0
-            cv_upload.experience_score = scores.get("experience", 0) or 0
-            cv_upload.education_score = scores.get("education", 0) or 0
-            cv_upload.skills_score = scores.get("skills", 0) or 0
-            cv_upload.format_score = scores.get("format", 0) or 0
-
-            # Generate suggestions safely
-            resume_text = cv_upload.raw_text
-            try:
-                job_suggestions = generate_job_keyword_suggestions(resume_text, job_name)
-            except Exception:
-                job_suggestions = ["Could not generate job-specific keyword suggestions."]
-
-
-            default_suggestions_list = scoring_results.get('suggestions', [])
-            default_suggestions = "\n".join(default_suggestions_list) if isinstance(default_suggestions_list, list) else str(default_suggestions_list or "")
-
-            # Combine AI and default suggestions
-            final_suggestions = ""
-            if job_suggestions and len(job_suggestions.strip()) > 50:
-                final_suggestions = job_suggestions
-                ai_lines = [line.strip().lower() for line in job_suggestions.split('\n') if line.strip()]
-                default_lines = [line.strip() for line in default_suggestions.split('\n') if line.strip()]
-                unique_defaults = [line for line in default_lines if not any(line.lower() in ai_line or ai_line in line.lower() for ai_line in ai_lines)]
-                if unique_defaults:
-                    final_suggestions += "\n\nAdditional improvements:\n• " + "\n• ".join(unique_defaults)
-            else:
-                final_suggestions = f"For the {job_name} role:\n• " + default_suggestions.replace("\n", "\n• ")
-
-            cv_upload.suggestions = final_suggestions[:1500]
+            # Save CV info
+            cv_upload.raw_text = parsed_data.get("raw_text", "")
             cv_upload.processed = True
+            cv_upload.suggestions = "\n".join(suggestions)
             cv_upload.save()
 
-            return render(request, "analyzer/cv_suggestions.html", {"cv": cv_upload})
-
         except Exception as e:
-            logger.error(f"Error processing CV: {e}")
-            if cv_upload.pk:
-                if cv_upload.file and default_storage.exists(cv_upload.file.name):
-                    default_storage.delete(cv_upload.file.name)
-                cv_upload.delete()
-            messages.error(request, f"Error processing file: {str(e)}")
-            return render(request, "analyzer/upload_and_suggest.html")
+            messages.error(request, f"Error processing CV: {e}")
 
-    return render(request, "analyzer/upload_and_suggest.html")
+    return render(request, "analyzer/upload_and_suggest.html", {"suggestions": suggestions})
+
 
 
 @login_required
